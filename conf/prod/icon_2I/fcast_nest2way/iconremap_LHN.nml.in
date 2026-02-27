@@ -1,0 +1,21 @@
+&remap_nml
+ in_filename       = "@lhnfile@"
+ in_type           = 3
+ out_grid_filename = "@LOCALGRID@"
+ out_filename      = "@out_file@"
+ out_type          = 2
+ out_filetype      = 4
+ !lsynthetic_grid = .TRUE.
+ !corner1 = 3., 32.
+ !corner2 = 22, 48.
+ !nxpoints = 800
+ !nypoints = 800
+ l_have3dbuffer    = .false.
+/
+&input_field_nml  ! precipitation rate
+ inputname      = "RAD_PRECIP"
+ outputname     = "RAD_PRECIP"
+ missval = -0.1  !9999.
+ init_val = -0.1 !9999.
+ intp_method = 4
+/

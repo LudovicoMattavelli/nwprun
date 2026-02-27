@@ -1,6 +1,7 @@
 %include <sched_wait.h>
 %include <%HPCENV%/smnd.h>
 %include <head.h>
+echo "L251219 Al momento devo ancora aggiungere il 3 Dominio"
 
 # source other optional modules
 . $NWPCONFBINDIR/nwptime.sh
@@ -84,6 +85,16 @@ if [[ -s "$arc_dir/$fg_file_in" ]]; then
     # Copy first guess
     fg_file_out=icon_${fg_date}${fg_time}00_+000${lt_hh}${lt_mm}00.gr1b
     rsync -p $arc_dir/$fg_file_in $fg_file_out 
+#V: Copy first guess of nested domain
+    if [ "$NESTING" == "Y" ]; then
+       if [[ "%SUITE%" == "icon_2I_fcast_ope_ng_nesting" ]];  then
+          echo "Non devo copiare DOM02 perchè non c'è"
+       else
+        fg_file_in_nest=icon_${fg_date}${fg_time}00_+000${lt_hh}${lt_mm}00_DOM02_${n3}.grb
+        fg_file_out_nest=icon_${fg_date}${fg_time}00_+000${lt_hh}${lt_mm}00_DOM02.grib
+        rsync -p $arc_dir/$fg_file_in_nest $fg_file_out_nest
+       fi
+    fi
 
     # Copy analysis increments from archive or create file with 0 increments
     # if they are not available
@@ -167,6 +178,11 @@ else
     LATBC_FG=.false.
     LTILE=.true.
     DT_SHIFT=0.
+# Redefine some variables for nesting experiments
+    if [ "$NESTING" == "Y" ]; then
+        FILEFG="icon_${fg_date}${fg_time}00_+000${lt_hh}${lt_mm}00_DOM<idom>.grib"
+        FILEAN="laf${DATES}${TIMES}${ANA_EXT}_inc_DOM<idom>.${n3}"
+    fi
 
     # Copy files for correspondence between GRIB2 shortNames and ICON internal names
     cp $(conf_getfile map_file.ana) $MODEL_WORKDIR

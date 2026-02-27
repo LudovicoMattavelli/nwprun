@@ -1,0 +1,2 @@
+L20251216:
+per gli esperimenti di NESTING, nei files archive_kenda_icon.ecf e get_radarlhn_icon.ecf mancano come minimo delle condizioni " if [ "$NESTING" == "Y" ]; then " che posso trovare invece nei jobs di V: VIRGINIA /g100_work/smr_prod/virginia/nwprun/ecflow/jobs

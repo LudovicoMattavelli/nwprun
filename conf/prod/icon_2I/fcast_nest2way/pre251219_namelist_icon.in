@@ -1,3 +1,4 @@
+! Questa namelist funziona correttamente, anche se come output è incompleta. L251218
 &limarea_nml
 ! fac_latbc_presbiascor       = 1
  latbc_varnames_map_file     = "map_file.latbc"
@@ -14,31 +15,36 @@
 &parallel_nml
  nproma                      =  8
  p_test_run                  = .false.
- l_test_openmp               = .false.
- l_log_checks                = .false.
- num_io_procs                = 1                ! may be more if frequent output is written
+ l_test_openmp               = .true.
+ l_log_checks                = .true.
+ num_io_procs                = 10                ! may be more if frequent output is written
  num_restart_procs           = 0
  num_prefetch_proc           = 1
- iorder_sendrecv             = 3
+! itype_comm                  = 1
+! iorder_sendrecv             = 3
 /
 
 &grid_nml
- dynamics_grid_filename      =  '@LOCALGRID@',
- radiation_grid_filename     =  '@LOCALGRID_PARENT@',
- dynamics_parent_grid_id     = 0,1
- lredgrid_phys               = .true.
+ dynamics_grid_filename      = '@LOCALGRID@','@LOCALGRID_NEST@'
+ radiation_grid_filename     = '@LOCALGRID_PARENT@',
+ dynamics_parent_grid_id     = 0,1,2
+ lredgrid_phys               = .true.,.true.
  lfeedback                   = .true.
  l_limited_area              = .true.
  ifeedback_type              = 2
-! start_time                  = 0.,             ! irrelevant without nesting
+ start_time                  = 0.,300.   ! DT_SHIFT          ! irrelevant without nesting
 /
 
 &initicon_nml
- init_mode                   = 7 ! @INIT_MODE@      ! 7 when init. from ICON, 2 from IFS
+ init_mode                   = @INIT_MODE@      ! 7 when init. from ICON, 2 from IFS
  zpbl1                       = 500.
  zpbl2                       = 1000.
  lread_ana                   = @LREAD_ANA@      ! true if analysis increments are read
- dwdfg_filename              = "@MODEL_PRE_DATADIR@/ic_@DATES@@TIMES@.nc"
+ lp2cintp_incr               = .true.           ! parent-to-child-interpolation
+ lp2cintp_sfcana             = .true.           ! of analyses (DET:.false.;EPS:.true.)
+ ifs2icon_filename           = "@MODEL_PRE_DATADIR@/ic_@DATES@@TIMES@.nc" 
+ dwdfg_filename              = "@MODEL_PRE_DATADIR@/@FILEFG@"
+ dwdana_filename             = "@MODEL_PRE_DATADIR@/@FILEAN@"
  filetype                    = @FILETYPE@
  ana_varnames_map_file       = "map_file.ana"
  ltile_coldstart             = @LTILE@
@@ -66,22 +72,40 @@
 &gribout_nml
  generatingCenter            = 80
  generatingSubcenter         = 255
- generatingProcessIdentifier = @MODEL_FCI2I_GP@
+ generatingProcessIdentifier = @MODEL_FCAST_GP@
  localtablesversion          = 0
 ! see mo_gribout_nml.f90 for preset behavior
- preset                      = 'deterministic'
+ preset                      = 'deterministic' ! V:'none'
+! typeOfGeneratingProcess     = 2
+! localDefinitionNumber       = 0
+! typeOfProcessedData         = 1
+
 /
 
-
 ! ------------------------------------------------------------------------------------------
-! OUTPUT: include predefined templates
+! OUTPUT: surface fields
 ! ------------------------------------------------------------------------------------------
-@INCLUDE output_nml_mec@
-@INCLUDE output_nml_main@
-@INCLUDE output_nml_simc@
-@INCLUDE output_nml_mlev@
-@INCLUDE output_nml_hzero@
-
+&output_nml
+! Pressure levels
+ filetype                     = 2                        ! output format: 2=GRIB2, 4=NETCDFv2
+ dom                          = 1
+ output_time_unit             = 3                        ! output in hours (3)
+ output_bounds                = @OUTPUT_START@,@MODEL_STOP@,1.       ! start, end, increment
+ steps_per_file               = 1
+ mode                         = 1                        ! 1: forecast mode (relative t-axis), 2: climate mode (absolute t-axis)
+ include_last                 = .FALSE.
+ output_filename              = "@MODEL_DATADIR@/icon_@DATES@@TIMES@00_plev_all2km_A2P0"
+ filename_format              = '<output_filename>_+<ddhhmmss>'                   ! file name base
+ ready_file                   = '@MODEL_DATADIR@/icon_@DATES@@TIMES@00_+<ddhhmmss>.rf'
+ pl_varlist                   = 'u','v','temp','qv','geopot','omega','rh'
+ p_levels                     = 25000.,50000.,70000.,85000.,92500.,100000.
+ output_grid                  = .FALSE.
+ stream_partitions_ml         = 1 ! needs to be adapted if num_io_procs is increased
+ remap                        = 0   !0 in case unstructured grid is required
+! reg_lon_def                  = 9.9,0.025,13.300
+! reg_lat_def                  = 41.8,0.02,45.200
+/
+/
 &run_nml
  num_lev                     = 65
  lvert_nest                  = .false.
@@ -96,8 +120,8 @@
  timers_level                = 10
  check_uuid_gracefully       = .false.
  output                      = "nml"
- luse_radarfwo               = @ACT_EMVORADO@
- ldass_lhn                   = @MODEL_LHN@
+! luse_radarfwo               = @ACT_EMVORADO@
+! ldass_lhn                   = @MODEL_LHN@
 /
 
 &nwp_phy_nml
@@ -125,8 +149,7 @@ icpl_o3_tp                   = 1
 dt_rad                       = 720.
 dt_conv                      = 120.,
 dt_sso                       = 120.,
-dt_gwd                       = 120.,
-lvariable_rain_n0            = .true.
+dt_gwd                       = 360.,
 /
 
 &nwp_tuning_nml
@@ -144,9 +167,6 @@ tune_box_liq_asy             = 4
 tune_gust_factor             = 7
 icpl_turb_clc                = 2
 max_calibfac_clcl            = 2
-tune_supsat_limfac           = 2.
-tune_zcsg                    = 0.25
-tune_v0snow                  = 20.
 /
 
 &turbdiff_nml
@@ -172,6 +192,7 @@ tune_v0snow                  = 20.
   ntiles         = 3
   nlev_snow      = 3
   lmulti_snow    = .false.
+!  itype_snowevap = 3  !L: added by me in previous version of fcast_urb
   itype_heatcond = 3
   idiag_snowfrac = 20
   lsnowtile      = .true.
@@ -186,6 +207,12 @@ tune_v0snow                  = 20.
   c_soil         = 1.25
   c_soil_urb     = 0.5
   sstice_mode    = 2
+!  lterra_urb     = .false.  !switch TERRA_URB
+!  lurbalb        = .true. !L: inizio mia parte
+!  itype_ahf      = 2      !L: se metto 2 cosa succede?
+!  itype_kbmo     = 2      !L: added by me
+!  itype_eisa     = 3      !L: idem
+
 /
 
 &radiation_nml
@@ -219,6 +246,7 @@ tune_v0snow                  = 20.
   divdamp_type    = 32
   divdamp_trans_start = 12500.
   divdamp_trans_end   = 17500.
+!  l_open_ubc      = .false.
   igradp_method   = 3
   l_zdiffu_t      = .true.
   thslp_zdiffu    = 0.02
@@ -240,9 +268,9 @@ tune_v0snow                  = 20.
 
 &dynamics_nml
  iequations     = 3
+! idiv_method    = 1
  divavg_cntrwgt = 0.50
  lcoriolis      = .true.
- lmoist_thdyn   = .false.
 /
 
 &transport_nml
@@ -290,33 +318,3 @@ tune_v0snow                  = 20.
  itype_lwemiss        = 2
 /
 
-&assimilation_nml
- nlhn_start      = 0  ! --> if IAU is true, LHN starts at the IAU
- nlhn_end        = @MODEL_NS_LHN@ !orig=20000
- nlhnverif_start = 0
- nlhnverif_end   = @MODEL_NS_LHN@ !orig=50000
- lhn_coef        = 2.0  ! 1
- rttend          = 0.0  ! --> no temperature increment is applied!
- fac_lhn_down    = 0.7  ! 0.5
- fac_lhn_up      = 1.1  ! 2
- lhn_logscale    = .true.
- lhn_artif       = .true. ! non c'era
- std_artif_max   = 4.     ! non c'era
- tt_artif_max    = 0.009  ! non c'era
- zlev_artif_max  = 3000.  ! non c'era
- lhn_artif_only  = .false. !default
- lhn_hum_adj     = .true.
- lhn_qrs         = .true.
- rqrsgmax        = 0.01 !0.4
- lhn_relax       = .true.
- nlhn_relax      = 2
- lhn_wweight     = .true.
- lhn_limit       = .true.
- abs_lhn_lim     = 0.0035 !0.013889
- lhn_filt        = .true.
- lhn_incloud     = .true.
- radar_in        = "@MODEL_LHN_WORKDIR@/"
- radardata_file  = "radardata_DOM1.nc"
- lhn_dt_obs      = @MODEL_LHN_DT@
- lhn_diag        = @MODEL_LHN@
-/

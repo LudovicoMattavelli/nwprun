@@ -1,0 +1,20 @@
+&output_nml
+! Static fields: topo + lsm + hlayers
+ filetype                     = 2                        ! output format: 2=GRIB2, 4=NETCDFv2
+ dom                          = 3
+ output_time_unit             = 3                        ! output in hours (3)
+ output_bounds                = 1.,@MODEL_STOP@,1.                 ! start, end, increment
+ steps_per_file               = 1
+ mode                         = 1                        ! 1: forecast mode (relative t-axis), 2: climate mode (absolute t-axis)
+ include_last                 = .FALSE.
+ output_filename              = "@MODEL_DATADIR@/icon_@DATES@@TIMES@00_static_500m"
+ filename_format              = '<output_filename>_+<ddhhmmss>'                   ! file name base
+ ready_file                   = '@MODEL_DATADIR@/icon_@DATES@@TIMES@00_+<ddhhmmss>.rf'
+ ml_varlist                   = 'z_mc','topography_c','fr_land'
+ m_levels                     = 1...65
+ output_grid                  = .FALSE.
+ stream_partitions_ml         = 1 ! needs to be adapted if num_io_procs is increased
+ remap                        = 1   !0 in case unstructured grid is required
+ reg_lon_def                  = 8.58,0.006,13.22 ! 8.6,0.006,13.2 ! aggiungo 2 punti (x eccesso) x vedere cosa succede ai bordi
+ reg_lat_def                  = 43.42,0.005,45.44 ! 43.43,0.005,45.43
+

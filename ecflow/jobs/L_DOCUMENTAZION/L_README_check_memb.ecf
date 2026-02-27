@@ -1,0 +1,14 @@
+%include <sched_wait.h>
+%include <head.h>
+
+if [ -n "$ENS_MEMB" -a -n "$ENS_TOTAL_MEMB" ]; then 		## controlla se entrambe le variabili sono definite
+    if [ "$ENS_MEMB" -le "$ENS_TOTAL_MEMB" ]; then		## controlla se ENS_MEMB è <= del ENS_TOTAL_MEMB
+        $ecflow_client --meter=required 2 # member required
+    else
+        $ecflow_client --meter=required 1 # member not required
+    fi
+else
+    $ecflow_client --meter=required 2 # member (deterministic) required
+fi
+
+%include <tail.h>

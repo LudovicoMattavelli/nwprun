@@ -418,8 +418,9 @@ class WaitAndRun:
             task.add_variable("ECF_DUMMY_TASK","Y")
             fam = node.add_family("run")
             if self.dep is not None:
-                fam.add_trigger("../"+self.dep+" == complete")
-            fam.add_trigger("./continue == complete")
+                fam.add_trigger("../"+self.dep+" == complete && ./continue == complete")
+            else:
+                fam.add_trigger("./continue == complete")
 
         elif self.conf['startmethod'] == "starttime_time":
             fam = node.add_family("run")

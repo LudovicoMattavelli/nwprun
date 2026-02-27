@@ -1,0 +1,214 @@
+%include <sched_wait.h>
+%include <%HPCENV%/smnd.h>
+%include <head.h>
+
+# source other optional modules
+. $NWPCONFBINDIR/nwptime.sh
+. $NWPCONFBINDIR/icon_model.sh
+. $NWPCONFBINDIR/nwpwait.sh
+# end of setup
+
+set -x
+
+cd $MODEL_PRE_DATADIR
+
+
+# ----------------------------------------------------------------------------------
+# Define variables to retrieve first guess and analysis increments
+# ----------------------------------------------------------------------------------
+# Archive directory
+if [ -n "$MODEL_ARCHIVE_OUTPUT_ANA" ]; then       # assimilation
+    arc_dir=$MODEL_ARCHIVE_OUTPUT_ANA/${DATES}${TIMES}
+elif [ -n "$MODEL_ARCHIVE_ANA" ]; then            # forecast
+    arc_dir=$MODEL_ARCHIVE_ANA/${DATES}${TIMES}
+fi
+
+# First guess initialization date and time
+fg_date=`date_sub $DATES $TIMES $ASS_CYCLE_LENGTH`
+fg_time=`time_sub $DATES $TIMES $ASS_CYCLE_LENGTH`
+
+# First guess lead time
+model_stop_min=$((ASS_CYCLE_LENGTH * 60))
+dt_shift_min=$((DT_IAU / 120))
+lead_time_min=$((model_stop_min - dt_shift_min))
+lt_hh=$((lead_time_min /  60 ))
+lt_mm=$((lead_time_min %% 60 ))
+
+# Ensemble member suffix
+if [ -z "$ENS_MEMB" ]; then  # deterministic
+    n3=det
+else                         # ensemble
+    n3=`printf "%%03d" $ENS_MEMB`           
+fi
+
+# Define first guess and analysis increments file names
+fg_file_in=icon_${fg_date}${fg_time}00_+000${lt_hh}${lt_mm}00_${n3}.grb
+anainc_file=laf${DATES}${TIMES}${ANA_EXT}_inc.${n3}
+
+
+# ----------------------------------------------------------------------------------
+# Check availability of analysis increments 
+# ----------------------------------------------------------------------------------
+# Wait a reasonable time for anaysis (forecast)
+if [ "$WAIT_ANALYSIS" == "Y" ]; then
+    nwpwait_setup
+    while true; do
+        if [ -s "$arc_dir/$anainc_file" ]; then
+            break
+        fi
+        nwpwait_wait || break # go on in case of missing analysis
+    done
+fi
+
+
+# ----------------------------------------------------------------------------------
+# Define model start, based on availability of first guess and analysis increments:
+# - If both exist, they are retrieved and SST is added to analysis increments file. 
+#   Model will be initialized with IAU.
+# - If only first guess exists, analysis increments equal to 0 are added. Model
+#   will be initialized with IAU, but without any analysis: soil and atmosphere
+#   information of previous cycle are not lost.
+# - If first guess does not exist, the model will be initialized with IFS soil and
+#   atmosphere.
+#
+# Possible improvements that may be implemented when IAU is not possible:
+# - Employ ICON-EU soil
+# - Employ first guess soil of 24h before 
+# ----------------------------------------------------------------------------------
+if [[ -s "$arc_dir/$fg_file_in" ]]; then  
+    # This is a warm start
+    echo "Warm start using IAU"
+    MODEL_FAST_ASSIM=Y
+    MODEL_SLOW_ASSIM=Y
+
+    # Copy first guess
+    fg_file_out=icon_${fg_date}${fg_time}00_+000${lt_hh}${lt_mm}00.gr1b
+    rsync -p $arc_dir/$fg_file_in $fg_file_out 
+
+    # Copy analysis increments from archive or create file with 0 increments
+    # if they are not available
+    if [[ -s "$arc_dir/$anainc_file" ]]; then   
+        echo "Analysis increments found"
+        rsync -p $arc_dir/$anainc_file .
+    else
+        echo "Analysis increments not found, create file with 0 increments"
+        if [ -z "$ENS_MEMB" ]; then         # deterministic
+            cp $(conf_getfile ana_inc_0.det) .
+            $SIMC_TOOLS grib_set -s dataDate=$DATES,dataTime=$TIMES ana_inc_0.det \
+                    $anainc_file
+        else                                # ensemble mebers
+            cp $(conf_getfile ana_inc_0.ens) .
+            $SIMC_TOOLS grib_set -s dataDate=$DATES,dataTime=$TIMES ana_inc_0.ens \
+                    $anainc_file
+        fi
+    fi
+
+    # Set SST as analysis
+    centre="centre=80,subCentre=255"
+    time="dataDate=$DATES,dataTime=${TIMES}00,significanceOfReferenceTime=0"
+    process_1="typeOfProcessedData=0,typeOfGeneratingProcess=0"
+    process_2="generatingProcessIdentifier=$MODEL_ASSIM_GP,backgroundProcess=2"
+    other="stepRange=0,shapeOfTheEarth=6"
+    $SIMC_TOOLS grib_set -s ${centre},${time},${process_1},${process_2},${other} \
+        ic_${DATES}${TIMES}_sst.grib ic_${DATES}${TIMES}_sst_ana.grib
+
+    # Add to analysis increments file
+    cat $anainc_file ic_${DATES}${TIMES}_sst_ana.grib > ana_with_sst.grib
+    cp ana_with_sst.grib $anainc_file
+
+# First guess and, likely, analysis increments not available
+else
+    echo "Cold start"
+    MODEL_FAST_ASSIM=N
+    MODEL_SLOW_ASSIM=N
+fi
+
+
+# ----------------------------------------------------------------------------------
+# Define namelist and copy dictionaries
+# ----------------------------------------------------------------------------------
+# Remove and re-create directory for model run
+safe_rm_rf $MODEL_WORKDIR
+mkdir -p $MODEL_DATADIR
+cd $MODEL_WORKDIR
+
+# Create variables for date in namelist
+export inidate=$( $DATECOM --date "${DATES} ${TIMES}" '+%%Y-%%m-%%dT%%H:%%M:%%SZ' )
+export findate=$( $DATECOM --date "${DATEE} ${TIMEE}" '+%%Y-%%m-%%dT%%H:%%M:%%SZ' )
+
+# Warm start
+if [ "$MODEL_FAST_ASSIM" == "Y" ]; then
+    # Define namelist variables for IAU initialization
+    INIT_MODE=5
+    FILEFG=$fg_file_out
+    FILEAN=$anainc_file
+    LREAD_ANA=.true.
+    FILETYPE=2
+    LATBC_FG=.true.
+    LTILE=.false.
+    DT_SHIFT=-$((DT_IAU / 2))
+
+    # Copy files for correspondence between GRIB2 shortNames and ICON internal names
+    cp $(conf_getfile map_file.ana_IAU) $MODEL_WORKDIR/map_file.ana
+    cp $(conf_getfile map_file.latbc_IAU) $MODEL_WORKDIR/map_file.latbc
+
+# Cold start
+else
+    # Define namelist variables for parent model initialization
+    if [ "$PARENTMODEL" = "IFS" ]; then
+        INIT_MODE=2
+    else
+        INIT_MODE=7
+    fi
+    FILEFG=""
+    FILEAN=""
+    LREAD_ANA=.false.
+    FILETYPE=4
+    LATBC_FG=.false.
+    LTILE=.true.
+    DT_SHIFT=0.
+
+    # Copy files for correspondence between GRIB2 shortNames and ICON internal names
+    cp $(conf_getfile map_file.ana) $MODEL_WORKDIR
+    cp $(conf_getfile map_file.latbc) $MODEL_WORKDIR/map_file.latbc
+fi
+
+# Transform MODEL_NH_LHN from hours to seconds
+if [ -z ${MODEL_NH_LHN+x} ]; then
+   MODEL_NS_LHN=10800
+else
+   MODEL_NS_LHN=$(( MODEL_NH_LHN*3600 ))
+fi
+
+# Handle radar volumes for namelist
+if [ "%RADVOL%" == "Y" ] && ls $HDF5_WORKDIR/* >/dev/null 2>&1; then
+    # Namelist for EMVORADO 
+    conf_template NAMELIST_EMVORADO
+
+    # Directory for Mie look-up tables
+    mkdir -p $WORKDIR/lookup_Mie_write
+
+    # Activate EMVORADO in ICON namelist
+    if [ -z "$ACT_EMVORADO" ]; then
+        export ACT_EMVORADO=.true.
+    fi
+else
+    export ACT_EMVORADO=.false.
+fi
+
+# Define new variable for perturbationNumber
+if [ -z "$ENS_MEMB" ]; then
+   PERT_NUMB=-1
+else
+   PERT_NUMB=$ENS_MEMB
+fi
+
+# Export namelist variables
+export INIT_MODE LREAD_ANA FILEFG FILEAN FILETYPE LATBC_FG LTILE DT_SHIFT MODEL_NS_LHN PERT_NUMB
+
+# Create ICON namelist
+conf_template icon_master.namelist namelist_icon
+
+
+
+%include <tail.h>

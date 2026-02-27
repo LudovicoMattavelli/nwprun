@@ -1,0 +1,20 @@
+&remap_nml
+ in_filename       = "sst.grib"
+ in_type           = 3
+ out_grid_filename = "@LOCALGRID@"
+ out_filename      = "@out_file_sst@"
+ out_type          = 2
+ out_filetype      = 2
+ l_have3dbuffer    = .false.
+/
+!
+! DEFINITIONS FOR IFS INPUT DATA
+! see also: ICON tutorial, section 2.2.2
+!
+&input_field_nml  ! sea surface temperature
+ inputname      = "SST"
+ outputname     = "SST" 
+ intp_method    = 3
+! code          = 34
+/
+

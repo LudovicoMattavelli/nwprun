@@ -7,7 +7,7 @@
 # end of setup
 
 set -x
-
+# NWPWAITSOLAR_RUN = differenza tra tempo nominale e tempo di attivazione
 if [ -n "$NWPWAITSOLAR_RUN" ]; then
     nwpwait_setup
     if check_run; then

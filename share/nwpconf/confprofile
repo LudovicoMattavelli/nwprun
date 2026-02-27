@@ -1,0 +1,5 @@
+# common setup
+# basic variables
+export NWPCONFDIR=$WORKDIR_BASE/nwprun/conf
+export NWPCONFBINDIR=$WORKDIR_BASE/nwprun/libexec/nwpconf
+

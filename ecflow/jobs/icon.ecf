@@ -1,7 +1,7 @@
 %include <sched_mpi.h>
 %include <%HPCENV%/modules_icon.h>
 %include <head.h>
-
+#### STO USANDO QUELLO DI VIRGINIA	L20251216
 # source other optional modules
 . $NWPCONFBINDIR/nwptime.sh
 . $NWPCONFBINDIR/icon_model.sh
@@ -16,10 +16,13 @@ cd $MODEL_WORKDIR
 cp $ECRAD_DATA/rrtmg_lw.nc $MODEL_WORKDIR
 cp $ECRAD_DATA/ECHAM6_CldOptProps.nc $MODEL_WORKDIR
 
+#V: Copy RTTOV coefficient files for synsat_nml
+#V: cp $MODEL_BASE/data/rttov/const/rt13coeffs_rttov7pred54L/*msg* $MODEL_WORKDIR #L20251216 al momento mi da problemi perchè nel mio icon non c'è
+echo "L251219 Al momento devo ancora aggiungere il 3 Dominio"
 # Run ICON
 $ecflow_client --event=started # trigger start of postproc
 parcomp_mpirun $EXTRA_MPIRUN $MODEL_BIN
-
+echo "test2"
 # Archive first guess for next ICON assimilation cycle
 if [ -n "$MODEL_ARCHIVE_OUTPUT_ANA" ]; then
     # Retrieve first guess lead time
@@ -41,8 +44,16 @@ if [ -n "$MODEL_ARCHIVE_OUTPUT_ANA" ]; then
     fi
 
     # Archive
+    #fgfile=$MODEL_DATADIR/icon_${DATES}${TIMES}00_+000${lt_hh}${lt_mm}00_DOM01.grb
+    #rsync -pt $fgfile $ARC_FOLD/icon_${DATES}${TIMES}00_+000${lt_hh}${lt_mm}00_DOM01_${n3}.grb
     fgfile=$MODEL_DATADIR/icon_${DATES}${TIMES}00_+000${lt_hh}${lt_mm}00.grb
+    echo "fino a qui ok"
     rsync -pt $fgfile $ARC_FOLD/icon_${DATES}${TIMES}00_+000${lt_hh}${lt_mm}00_${n3}.grb
+    if [ "$NESTING" == "Y" ]; then   
+	echo "siamo sulla giusa strada" 
+        fgfile=$MODEL_DATADIR/icon_${DATES}${TIMES}00_+000${lt_hh}${lt_mm}00_DOM02.grb
+        rsync -pt $fgfile $ARC_FOLD/icon_${DATES}${TIMES}00_+000${lt_hh}${lt_mm}00_DOM02_${n3}.grb  
+    fi
 fi
 
 # Save LHN diagnostics for deterministic member of KENDA
@@ -55,27 +66,65 @@ if ([[ -n "$CINECA_ARCHIVE_POST" ]] && [[ "%SUITE%" == "icon_2I_enda"* ]]); then
     fi
 
     # Create folder
-    subdir=%SUITE%/$DATE$TIME
+    subdir=$DATE$TIME
     mkdir -p $CINECA_ARCHIVE_POST/$subdir
 
-    # Save deterministic diagnostic file every hour and lhn
+    # Save deterministic diagnostic, output on model levels at +00 and +60 minutes,
+    # lhn and fof files
     if [[ -z "$ENS_MEMB" ]]; then
-        filename_orig=`basename $MODEL_DATADIR/*+00010000_diag.grb`
-        filename_copy=${filename_orig:0:-4}_${n3}.grb
-        rsync -pt $MODEL_DATADIR/$filename_orig \
-                  $CINECA_ARCHIVE_POST/$subdir/$filename_copy          || true
-        rsync -pt $MODEL_WORKDIR/lhn.log $CINECA_ARCHIVE_POST/$subdir  || true
+        # Copy files on regular grid
+        #filename_orig_d1=`basename $MODEL_DATADIR/*+00010000_DOM01_diag.grb`
+	filename_orig_d1=`basename $MODEL_DATADIR/*+00010000_diag.grb`
+        filename_copy_d1=${filename_orig_d1:0:-4}_${n3}.grb
+        filename_orig_d2=`basename $MODEL_DATADIR/*+00010000_DOM02_diag.grb`
+        filename_copy_d2=${filename_orig_d2:0:-4}_${n3}.grb
+        rsync -pt $MODEL_DATADIR/$filename_orig_d1 \
+                  $CINECA_ARCHIVE_POST/$subdir/$filename_copy_d1       || true
+        rsync -pt $MODEL_DATADIR/$filename_orig_d2 \
+                  $CINECA_ARCHIVE_POST/$subdir/$filename_copy_d2       || true
 
-    # Save ensemble diagnostic file at 21 UTC
+        # Copy files on unstructured grid on model levels 
+        filename_orig_00=`basename $MODEL_DATADIR/*+00000000.grb`
+        filename_copy_00=${filename_orig_00:0:-4}_${n3}.grb
+        filename_orig_01=`basename $MODEL_DATADIR/*+00010000.grb`
+        filename_copy_01=${filename_orig_01:0:-4}_${n3}.grb
+        rsync -pt $MODEL_DATADIR/$filename_orig_00 \
+                  $CINECA_ARCHIVE_POST/$subdir/$filename_copy_00       || true
+        rsync -pt $MODEL_DATADIR/$filename_orig_01 \
+                  $CINECA_ARCHIVE_POST/$subdir/$filename_copy_01       || true
+
+        # Copy lhn and fof
+        rsync -pt $MODEL_WORKDIR/lhn.log $CINECA_ARCHIVE_POST/$subdir  || true
+        rsync -pt $MODEL_DATADIR/fof*    $CINECA_ARCHIVE_POST/$subdir  || true
+
+    # Save ensemble filee
     else
-        if [ "$TIME" = "21" ]; then
-            filename_orig=`basename $MODEL_DATADIR/*+00010000_diag.grb`
-            filename_copy=${filename_orig:0:-4}_${n3}.grb
-            rsync -pt $MODEL_DATADIR/$filename_orig  \
-                      $CINECA_ARCHIVE_POST/$subdir/$filename_copy  || true
-        fi
+        #filename_orig_d1=`basename $MODEL_DATADIR/*+00010000_DOM01_diag.grb`
+	filename_orig_d1=`basename $MODEL_DATADIR/*+00010000_diag.grb`	
+        filename_copy_d1=${filename_orig_d1:0:-4}_${n3}.grb
+        filename_orig_d2=`basename $MODEL_DATADIR/*+00010000_DOM02_diag.grb`
+        filename_copy_d2=${filename_orig_d2:0:-4}_${n3}.grb
+        rsync -pt $MODEL_DATADIR/$filename_orig_d1  \
+                  $CINECA_ARCHIVE_POST/$subdir/$filename_copy_d1  || true
+        rsync -pt $MODEL_DATADIR/$filename_orig_d2  \
+                  $CINECA_ARCHIVE_POST/$subdir/$filename_copy_d2  || true
     fi
 fi
+#L20251218: ho commentato questi, che c'erano da Virginia ma non nella versione base, perchè al momento non funziona: ICON mi da un errore che non capisco. 
+# Questa funzione serve per salvarsi un forecast se ne faccio diversi in maniera ricorsiva
+# Save forecast output
+#if ([[ -n "$CINECA_ARCHIVE_POST" ]] && [[ "%SUITE%" == "icon_2I_fcast"* ]]); then
+#    # Create folder
+#    subdir=$DATES$TIMES
+#    mkdir -p $CINECA_ARCHIVE_POST/$subdir
+
+    # Save data #L20251218: ho commentato questi 3 perchè non li voglio per il momento
+#    echo "L20251218: ho commentato delle cose per il salvataggio"
+#    rsync -pt $MODEL_DATADIR/*_diag.grb $CINECA_ARCHIVE_POST/$subdir || true
+#    rsync -pt $MODEL_DATADIR/*.grb $CINECA_ARCHIVE_POST/$subdir || true	
+#    rsync -pt $MODEL_DATADIR/*_const.grb $CINECA_ARCHIVE_POST/$subdir
+#    rsync -pt $MODEL_WORKDIR/lhn.log $CINECA_ARCHIVE_POST/$subdir  || true	
+#fi
 
 date
 

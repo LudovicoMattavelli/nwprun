@@ -1,0 +1,12 @@
+#!/bin/bash
+## Spiegazione del file 
+#PBS -o %ECF_JOBOUT% 		## Dice a PBS di scrivere l’output standard (stdout) nel file ECF_JOBOUT
+#PBS -j oe 			## Unisce stderr e stdout in un unico file di output
+#PBS -l select=1:ncpus=1:mpiprocs=1:mem=4gb ## Richiede una risorsa di calcolo con: 1 nodo (select=1),1 CPU (ncpus=1),1 processo MPI (mpiprocs=1) e 4 GB di memoria
+#PBS -l place=pack:shared 	## Specifica la strategia di placement: i job possono essere “impacchettati” insieme su nodi condivisi
+#PBS -l walltime=03:00:00 	## Impone un limite massimo di 3 ore per l’esecuzione del job
+. ~/smnd_profile
+
+
+
+

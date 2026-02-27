@@ -1,0 +1,81 @@
+%include <sched_mpi.h>
+%include <%HPCENV%/modules_icon.h>
+%include <head.h>
+
+# source other optional modules
+. $NWPCONFBINDIR/nwptime.sh
+. $NWPCONFBINDIR/icon_model.sh
+. $NWPCONFBINDIR/parcomp.sh
+# end of setup
+
+set -x
+date
+
+# Copy data for EcRad
+cd $MODEL_WORKDIR
+cp $ECRAD_DATA/rrtmg_lw.nc $MODEL_WORKDIR
+cp $ECRAD_DATA/ECHAM6_CldOptProps.nc $MODEL_WORKDIR
+
+# Run ICON
+$ecflow_client --event=started # trigger start of postproc
+parcomp_mpirun $EXTRA_MPIRUN $MODEL_BIN
+
+# Archive first guess for next ICON assimilation cycle
+if [ -n "$MODEL_ARCHIVE_OUTPUT_ANA" ]; then
+    # Retrieve first guess lead time
+    model_stop_min=$((MODEL_STOP * 60))
+    dt_shift_min=$((DT_IAU / 120))
+    lead_time_min=$((model_stop_min - dt_shift_min))
+    lt_hh=$((lead_time_min /  60 ))
+    lt_mm=$((lead_time_min %% 60 ))
+
+    # Create archive folder
+    ARC_FOLD=$MODEL_ARCHIVE_OUTPUT_ANA/${DATE}${TIME}
+    mkdir -p $ARC_FOLD
+
+    # Define file suffix
+    if [ -z "$ENS_MEMB" ]; then
+        n3=det
+    else  
+        n3=`printf "%%03d" $ENS_MEMB`
+    fi
+
+    # Archive
+    fgfile=$MODEL_DATADIR/icon_${DATES}${TIMES}00_+000${lt_hh}${lt_mm}00.grb 
+    rsync -pt $fgfile $ARC_FOLD/icon_${DATES}${TIMES}00_+000${lt_hh}${lt_mm}00_${n3}.grb 
+fi
+
+# Save LHN diagnostics for deterministic member of KENDA
+if ([[ -n "$CINECA_ARCHIVE_POST" ]] && [[ "%SUITE%" == "icon_2I_enda"* ]]); then
+    # Define file suffix
+    if [ -z "$ENS_MEMB" ]; then
+        n3=det
+    else
+        n3=`printf "%%03d" $ENS_MEMB`
+    fi
+
+    # Create folder
+    subdir=%SUITE%/$DATE$TIME
+    mkdir -p $CINECA_ARCHIVE_POST/$subdir
+    # Save deterministic diagnostic file every hour and lhn
+    if [[ -z "$ENS_MEMB" ]]; then
+        filename_orig=`basename $MODEL_DATADIR/*+00010000_diag.grb`
+        filename_copy=${filename_orig:0:-4}_${n3}.grb
+        rsync -pt $MODEL_DATADIR/$filename_orig \
+                  $CINECA_ARCHIVE_POST/$subdir/$filename_copy          || true
+        rsync -pt $MODEL_WORKDIR/lhn.log $CINECA_ARCHIVE_POST/$subdir  || true
+
+    # Save ensemble diagnostic file at 21 UTC
+    else
+        if [ "$TIME" = "21" ]; then
+            filename_orig=`basename $MODEL_DATADIR/*+00010000_diag.grb`
+            filename_copy=${filename_orig:0:-4}_${n3}.grb
+            rsync -pt $MODEL_DATADIR/$filename_orig  \
+                      $CINECA_ARCHIVE_POST/$subdir/$filename_copy  || true
+        fi
+    fi
+fi
+
+date
+
+%include <tail.h>

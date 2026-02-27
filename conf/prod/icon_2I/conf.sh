@@ -1,9 +1,9 @@
 # Model environment variables
-MODEL_BASE=$WORKDIR_BASE/srcintel/icon_2025-04-1
+MODEL_BASE=/ind2/meteo/a07smr03/lami/srcintel/icon_2025-04-1 # .
 MODEL_BIN=$MODEL_BASE/bin/icon
 ECRAD_DATA=$MODEL_BASE/data
-MODEL_STATIC=$WORKDIR_BASE/data/icon
-MODEL_PRE_BINDIR=$WORKDIR_BASE/srcintel/icontools-2.5.0/icontools
+MODEL_STATIC=/ind2/meteo/a07smr03/lami/data/icon  #.
+MODEL_PRE_BINDIR=/ind2/meteo/a07smr03/lami/srcintel/icontools-2.5.0/icontools
 PARENTMODEL_DATADIR=$WORKDIR/input/data
 
 # Working directories for observations
@@ -26,11 +26,11 @@ MODEL_PRE_DATADIR=$WORKDIR/preicon/data
 MODEL_WORKDIR=$WORKDIR/icon
 MODEL_DATADIR=$WORKDIR/icon/data
 
-# ICON-2I domain and grid files
-DOMAIN=ICON_REG3_DOM01	
+# ICON-2I domain and grid files #LUDO
+DOMAIN=ICON_REG3_DOM01
 LOCALGRID=$MODEL_STATIC/domain_$DOMAIN/${DOMAIN}.nc
-LOCALGRID_PARENT=$MODEL_STATIC/domain_$DOMAIN/${DOMAIN}.parent.nc
-LOCALGRID_EXTERNAL=$MODEL_STATIC/domain_$DOMAIN/external_parameter_icon_${DOMAIN}_tiles.nc
+LOCALGRID_PARENT=$MODEL_STATIC/domain_$DOMAIN/${DOMAIN}.parent.nc 
+LOCALGRID_EXTERNAL=$MODEL_STATIC/domain_$DOMAIN/external_parameter_${DOMAIN}_tiles.nc
 
 # Time step
 TIME_STEP=20
@@ -63,3 +63,6 @@ IMPORT_THREAD=output
 CROSS_COORD_FILE=$WORKDIR_BASE/nwprun/conf/cross.shp
 # start output at beginning by default
 OUTPUT_START=0
+
+# LUDO: variabile aggiunta per bloccare la suite in caso di errori
+STOP_ON_FAIL=Y

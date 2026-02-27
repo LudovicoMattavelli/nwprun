@@ -26,7 +26,6 @@ bc_tasks=$(( ($nbc+$NBC_PER_TASK-1)/$NBC_PER_TASK+1 ))
 
 export OMP_NUM_THREADS=1
 srun --ntasks=$bc_tasks %BASEDIR%/ecflow/jobs/run_remap.sh 
-
 # Copy "lateral_boundary.grid.nc"
 cp $MODEL_PRE_WORKDIR/remap_1/lateral_boundary.grid.nc $MODEL_PRE_DATADIR
 

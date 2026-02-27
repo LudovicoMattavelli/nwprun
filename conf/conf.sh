@@ -3,7 +3,7 @@
 
 case "$HPC_SYSTEM" in
   *.metarpa | maial* | nodo* ) # Arpae
-# General
+# General (LUDO:questi li cambio in ogni casistica)
     WORKDIR=$WORK/$NWPCONF
     LOGDIR=$WORKDIR_BASE/log
     ARKI_DIR=$WORKDIR_BASE/arkimet
@@ -43,18 +43,19 @@ case "$HPC_SYSTEM" in
 	    WORKDIR=$WORKDIR_RELOC/$NWPCONF
     fi
     LOGDIR=$WORKDIR_BASE/log
-    ARKI_DIR=$WORKDIR_BASE/arkimet
+    ARKI_DIR=http://login05:8090/dataset
     ARKI_CONF=$ARKI_DIR/config
     ARKI_SCAN_METHOD=configured_importer
     IMPORT_SIGNAL_METHOD=filesystem
-    IMPORT_SIGNAL_BASE=$ARKI_DIR/import_signal
-    ARKI_IMPROOT=$WORKDIR_BASE/import
-    ARKI_IMPDIR=$ARKI_IMPROOT
-    GRIB_API_EDZW=$WORKDIR_BASE/grib_api_edzw
-    ECCODES_DEFINITIONS_BASE=$WORKDIR_BASE/data/definitions/definitions.cineca-2.21.0
-    ECCODES_DEFINITIONS_DWD=$WORKDIR_BASE/data/definitions/definitions.edzw-2.21.0-1
-    SIMC_TOOLS="singularity exec -B /ind2/meteo -B /ind2/meteoarch $WORKDIR_BASE/simctools_nwprun_r8.sif"
-    CINECA_ARCHIVE_POST=$WORKDIR_BASE/arkimet/archive
+    IMPORT_SIGNAL_BASE=/ind2/meteo/a07smr03/lami/arkimet/import_signal
+    #ARKI_IMPROOT=$WORKDIR_BASE/import
+    #ARKI_IMPDIR=$ARKI_IMPROOT
+    GRIB_API_EDZW=/ind2/meteo/a07smr03/lami/grib_api_edzw
+    ECCODES_DEFINITIONS_BASE=/ind2/meteo/a07smr03/lami/data/definitions/definitions.cineca-2.21.0
+    ECCODES_DEFINITIONS_DWD=/ind2/meteo/a07smr03/lami/data/definitions/definitions.edzw-2.21.0-1
+    #R: definitions.edzw-2.21.0-1
+    SIMC_TOOLS="singularity exec -B /ind2/meteo -B /ind2/meteoarch -B $WORK /ind2/meteo/a07smr03/lami/simctools_nwprun_r8.sif"
+    CINECA_ARCHIVE_POST=$WORKDIR_BASE/archive #L20251218 Dove mi salvo il lavoro quando faccio più cicli
     CINECA_RUN=/ind2/meteo/a07smr01/LM_WorkDir/g100/lm/PROD/work
     CINECA_RUN_ICON=/ind2/meteo/a07smr01/ICON_WorkDir/PROD
     CINECA_UPLDIR=/ind2/meteoarch/a07smr01/arch_lm/g100/auto/download/OPE/AM/LAMI/IFS

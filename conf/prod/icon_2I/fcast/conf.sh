@@ -17,17 +17,17 @@ MODEL_ARCHIVE_ANA=$WORKDIR/../enda/archive
 # Time difference between model and parent reftime 
 case $TIME in
     03 | 09 | 15 | 21)
-        MODEL_DELTABD=9
+        MODEL_DELTABD=0 #was 9
         ;;
     00 | 06 | 12 | 18)
-        MODEL_DELTABD=6
+        MODEL_DELTABD=0 #was 6
 esac
 
 # Number of boundary conditions handled by each task
 NBC_PER_TASK=1
 
 # Latent Heat Nudging (LHN)
-MODEL_LHN=.TRUE.
+MODEL_LHN=.FALSE. #LUDO: can be false
 MODEL_NH_LHN=4
 
 # MEC verification (modified version of executables)
@@ -42,9 +42,29 @@ ARKI_DIR=$WORKDIR/arki
 unset ARKI_IMPDIR
 ARKI_SYNCDIR=$WORKDIR_BASE/import/sync.lami
 ARKI_DLDIR=$WORKDIR_BASE/download
+unset ARKI_SYNCDIR
+unset ARKI_DLDIR
 CROSS_NETWORK=icon_2I_fcast_c
 VPROF_NETWORK=icon_2I_fcast_v
+unset CROSS_NETWORK
+unset VPROF_NETWORK
 MODEL_SIGNAL=icon_2I_fcast
+
+
+# setup for arkilocal
+ARKI_DIR=$WORKDIR/arki
+# setup for remote import
+unset ARKI_IMPDIR
+ARKI_SYNCDIR=$WORKDIR_BASE/import/sync.lami
+ARKI_DLDIR=$WORKDIR_BASE/download
+unset ARKI_SYNCDIR
+unset ARKI_DLDIR
+CROSS_NETWORK=icon_2I_fcast_c
+VPROF_NETWORK=icon_2I_fcast_v
+unset CROSS_NETWORK
+unset VPROF_NETWORK
+MODEL_SIGNAL=icon_2I_fcast
+
 
 # suite timing
 NWPWAITELAPS=14400

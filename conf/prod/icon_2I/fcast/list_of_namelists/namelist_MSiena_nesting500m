@@ -1,0 +1,419 @@
+&limarea_nml
+! fac_latbc_presbiascor        = 1
+ latbc_varnames_map_file      = "map_file.latbc"
+ latbc_boundary_grid          = "domain_DOM01_lbc.grid.nc"
+ latbc_filename               = "lbc_2022091500_<y><m><d><h>.nc"
+ init_latbc_from_fg           = .true. 
+ itype_latbc                  = 1
+ dtime_latbc                  = 3600.
+ latbc_path                   = "/scratch/atmos/matteo.siena4/ICON_in/Marche2022_ENS1"
+ nretries                     = 300
+ retry_wait_sec               = 60
+/
+&parallel_nml
+ nproma          =  8
+ p_test_run	 = .false.
+ l_test_openmp   = .false.
+ l_log_checks    = .true.
+ num_io_procs    =  3 ! may be more if frequent output is written
+ num_restart_procs = 0
+ num_prefetch_proc = 1
+ itype_comm	 =  1
+ iorder_sendrecv =  3
+/
+&grid_nml
+ dynamics_grid_filename  =  "/scratch/atmos/matteo.siena4/ICON_in/dominio_nest/domain_DOM01.nc","/scratch/atmos/matteo.siena4/ICON_in/dominio_nest/domain_DOM02.nc","/scratch/atmos/matteo.siena4/ICON_in/dominio_nest/domain_DOM03.nc"
+ radiation_grid_filename =  "/scratch/atmos/matteo.siena4/ICON_in/dominio_nest/domain_DOM01.parent.nc"
+ dynamics_parent_grid_id = 0,1,2,3
+ lredgrid_phys           = .true.,.true,.true.
+ lfeedback               = .true.
+ l_limited_area          = .true.
+ ifeedback_type          = 2
+ start_time  = 0.,900.,1800. ! irrelevant without nesting
+/
+&initicon_nml
+ init_mode                    = 2 ! For ICON-LAM runs, use 7 when initialized from ICON and 2 from IFS
+ zpbl1                        = 500.
+ zpbl2                        = 1000.
+ lread_ana                    = .false. ! true if analysis increments are read
+ ifs2icon_filename            = "/scratch/atmos/matteo.siena4/ICON_in/Marche2022_ENS1/ic_2022091500.nc"
+ filetype                     = 4
+ ana_varnames_map_file        = "/scratch/atmos/matteo.siena4/ICON_in/Marche2022_ENS1/map_file.ana"
+ ltile_coldstart              = .FALSE. !prima era a true
+ ltile_init                   = .TRUE. ! True for IFS, False for ICON
+/
+&io_nml
+ itype_pres_msl               = 5   !se lo pongo pari a 3 ottengo la IFS-type extrapolation
+ itype_rh                     = 1   !con 2 ho la mixed phase (water and ice)
+! output_nml_dict             = "map_file.ana"
+ lmask_boundary               = .true. ! false in assimilation cycle
+/
+&gribout_nml
+ generatingCenter             = 80
+ generatingSubcenter          = 255
+ generatingProcessIdentifier  = 2
+/
+! ------------------------------------------------------------------------------
+! OUTPUT: Constant fields
+! ------------------------------------------------------------------------------
+&output_nml
+ filetype                     =  2                        ! output format: 2=GRIB2, 4=NETCDFv2
+ dom                          =  1
+ output_bounds                =  0.,0.,3600.              ! start, end, increment
+ steps_per_file               =  1
+ mode                         =  1                        ! 1: forecast mode (relative t-axis), 2: climate mode (absolute t-axis)
+ include_last                 = .FALSE.
+ output_filename              = "/scratch/atmos/matteo.siena4/ICON_out/Marche_ENS/m2/nest3/icon_2022091500_const"
+ filename_format              = "<output_filename>"                   ! file name base
+ ready_file                   = "/scratch/atmos/matteo.siena4/ICON_out/Marche_ENS/m2/nest3/icon_2022091500_+<ddhhmmss>.rf"
+ ml_varlist                   = "z_ifc", "topography_c", "fis", "soiltyp", "fr_land"
+ output_grid                  =  .FALSE.
+ stream_partitions_ml         =  1 ! needs to be adapted if num_io_procs is increased
+ remap                        =  0 !0 in case unstructured grid is required
+/
+! ------------------------------------------------------------------------------------------
+! OUTPUT: Diagnostics on regular grid for every hour (0-24)
+! ------------------------------------------------------------------------------------------
+&output_nml
+ filetype                     =  2                    ! output format: 2=GRIB2, 4=NETCDFv2
+ dom       	              =  1
+ output_time_unit             =  3                    ! output in hours (3)
+ output_bounds                =  0.,24,1.   ! start, end, increment
+ steps_per_file               =  1
+ mode                         =  1                    ! 1: forecast mode (relative t-axis), 2: climate mode (absolute t-axis)
+ include_last                 = .FALSE.
+ output_filename              = "/scratch/atmos/matteo.siena4/ICON_out/Marche_ENS/m2/nest3/icon_2022091500_1"
+ filename_format              = "<output_filename>_+<ddhhmmss>_reg"	 ! file name base
+ ready_file                   = "/scratch/atmos/matteo.siena4/ICON_out/Marche_ENS/m2/nest3/icon_2022091500_1_+<ddhhmmss>_reg.rf"
+ ml_varlist                   = "tot_prec", "u", "v", "w", "geopot", "tot_prec_rate", "u_10m", "v_10m", "gust10", "t_2m", "cape", "pres_msl"
+ output_grid                  =  .FALSE.
+ stream_partitions_ml         =  1 ! needs to be adapted if num_io_procs is increased
+ remap                        =  1 !0 in case unstructured grid is required
+ reg_lon_def                  = 3.0,0.025,22.001
+ reg_lat_def                  = 33.7,0.02,48.901
+/
+&output_nml
+ filetype                     =  2                    ! output format: 2=GRIB2, 4=NETCDFv2
+ dom                          =  1
+ output_time_unit             =  3                    ! output in hours (3)
+ output_bounds                =  0.,24,1.   ! start, end, increment
+ steps_per_file               =  1
+ mode                         =  1                    ! 1: forecast mode (relative t-axis), 2: climate mode (absolute t-axis)
+ include_last                 = .FALSE.
+ output_filename              = "/scratch/atmos/matteo.siena4/ICON_out/Marche_ENS/m2/nest3/icon_p_2022091500_1"
+ filename_format              = "<output_filename>_+<ddhhmmss>_reg"	 ! file name base
+ ready_file                   = "/scratch/atmos/matteo.siena4/ICON_out/Marche_ENS/m2/nest3/icon_p_2022091500_1_+<ddhhmmss>_reg.rf"
+  ml_varlist                   = "tot_prec", "u", "v", "w", "geopot", "tot_prec_rate", "u_10m", "v_10m", "gust10", "t_2m", "cape", "pres_msl"
+ output_grid                  =  .FALSE.
+ stream_partitions_ml         =  1 ! needs to be adapted if num_io_procs is increased
+ remap                        =  1 !0 in case unstructured grid is required
+ reg_lon_def                  = 3.0,0.025,22.001
+ reg_lat_def                  = 33.7,0.02,48.901
+/
+&output_nml
+ filetype                     =  2                    ! output format: 2=GRIB2, 4=NETCDFv2
+ dom                          =  1
+ output_time_unit             =  3                    ! output in hours (3)
+ output_bounds                =  0.,24,1.   ! start, end, increment
+ steps_per_file               =  1
+ mode                         =  1                    ! 1: forecast mode (relative t-axis), 2: climate mode (absolute t-axis)
+ include_last                 = .FALSE.
+ output_filename              = "/scratch/atmos/matteo.siena4/ICON_out/Marche_ENS/m2/nest3/icon_p_2022091500_1"
+ filename_format              = "<output_filename>_+<ddhhmmss>_reg"	 ! file name base
+ ready_file                   = "/scratch/atmos/matteo.siena4/ICON_out/Marche_ENS/m2/nest3/icon_p_2022091500_1_+<ddhhmmss>_reg.rf"
+ pl_varlist                   = "u", "v", "w", "temp", "qv", "rh", "geopot"
+ p_levels                     = 100000, 95000, 85000, 70000, 50000, 30000, 20000, 10000
+ output_grid                  =  .FALSE.
+ stream_partitions_ml         =  1 ! needs to be adapted if num_io_procs is increased
+ remap                        =  1 !0 in case unstructured grid is required
+ reg_lon_def                  = 3.0,0.025,22.001
+ reg_lat_def                  = 33.7,0.02,48.901
+/
+
+&output_nml
+ filetype                     =  2                    ! output format: 2=GRIB2, 4=NETCDFv2
+ dom                          =  2
+ output_time_unit             =  3                    ! output in hours (3)
+ output_bounds                =  0.,24,1.   ! start, end, increment
+ steps_per_file               =  1
+ mode                         =  1                    ! 1: forecast mode (relative t-axis), 2: climate mode (absolute t-axis)
+ include_last                 = .FALSE.
+ output_filename              = "/scratch/atmos/matteo.siena4/ICON_out/Marche_ENS/m2/nest3/icon_2022091500_2"
+ filename_format              = "<output_filename>_+<ddhhmmss>_reg"	 ! file name base
+ ready_file                   = "/scratch/atmos/matteo.siena4/ICON_out/Marche_ENS/m2/nest3/icon_2022091500_2_+<ddhhmmss>_reg.rf"
+ ml_varlist                   = "tot_prec", "u", "v", "w", "geopot", "tot_prec_rate", "u_10m", "v_10m", "gust10", "t_2m", "cape", "pres_msl"
+ output_grid                  =  .FALSE.
+ stream_partitions_ml         =  1 ! needs to be adapted if num_io_procs is increased
+ remap                        =  1 !0 in case unstructured grid is required
+ reg_lon_def                  = 8.5,0.0125,16.5
+ reg_lat_def                  = 41.35,0.01,45.65
+/
+&output_nml
+ filetype                     =  2                    ! output format: 2=GRIB2, 4=NETCDFv2
+ dom                          =  2
+ output_time_unit             =  3                    ! output in hours (3)
+ output_bounds                =  0.,24,1.   ! start, end, increment
+ steps_per_file               =  1
+ mode                         =  1                    ! 1: forecast mode (relative t-axis), 2: climate mode (absolute t-axis)
+ include_last                 = .FALSE.
+ output_filename              = "/scratch/atmos/matteo.siena4/ICON_out/Marche_ENS/m2/nest3/icon_p_2022091500_2"
+ filename_format              = "<output_filename>_+<ddhhmmss>_reg"	 ! file name base
+ ready_file                   = "/scratch/atmos/matteo.siena4/ICON_out/Marche_ENS/m2/nest3/icon_p_2022091500_2_+<ddhhmmss>_reg.rf"
+ pl_varlist                   = "u", "v", "w", "temp", "qv", "rh", "geopot"
+ p_levels                     = 100000, 95000, 85000, 70000, 50000, 30000, 20000, 10000
+ output_grid                  =  .FALSE.
+ stream_partitions_ml         =  1 ! needs to be adapted if num_io_procs is increased
+ remap                        =  1 !0 in case unstructured grid is required
+ reg_lon_def                  = 8.5,0.0125,16.5
+ reg_lat_def                  = 41.35,0.01,45.65
+/
+&output_nml
+ filetype                     =  2                    ! output format: 2=GRIB2, 4=NETCDFv2
+ dom                          =  3
+ output_time_unit             =  3                    ! output in hours (3)
+ output_bounds                =  0.,24,1.   ! start, end, increment
+ steps_per_file               =  1
+ mode                         =  1                    ! 1: forecast mode (relative t-axis), 2: climate mode (absolute t-axis)
+include_last                 = .FALSE.
+ output_filename              = "/scratch/atmos/matteo.siena4/ICON_out/Marche_ENS/m2/nest3/icon_2022091500_3"
+ filename_format              = "<output_filename>_+<ddhhmmss>_reg"	 ! file name base
+ ready_file                   = "/scratch/atmos/matteo.siena4/ICON_out/Marche_ENS/m2/nest3/icon_2022091500_3_+<ddhhmmss>_reg.rf"
+ ml_varlist                   = "tot_prec", "u", "v", "w", "geopot", "tot_prec_rate", "u_10m", "v_10m", "gust10", "t_2m", "cape", "pres_msl"
+ output_grid                  =  .FALSE.
+ stream_partitions_ml         =  1 ! needs to be adapted if num_io_procs is increased
+ remap                        =  1 !0 in case unstructured grid is required
+ reg_lon_def                  = 10.5,0.00625,14.5
+ reg_lat_def                  = 42.3,0.005,44.7
+/
+&output_nml
+ filetype                     =  2                    ! output format: 2=GRIB2, 4=NETCDFv2
+ dom                          =  3
+ output_time_unit             =  3                    ! output in hours (3)
+ output_bounds                =  0.,24,1.   ! start, end, increment
+ steps_per_file               =  1
+ mode                         =  1                    ! 1: forecast mode (relative t-axis), 2: climate mode (absolute t-axis)
+ include_last                 = .FALSE.
+ output_filename              = "/scratch/atmos/matteo.siena4/ICON_out/Marche_ENS/m2/nest3/icon_p_2022091500_3"
+ filename_format              = "<output_filename>_+<ddhhmmss>_reg"	 ! file name base
+ ready_file                   = "/scratch/atmos/matteo.siena4/ICON_out/Marche_ENS/m2/nest3/icon_p_2022091500_3_+<ddhhmmss>_reg.rf"
+ pl_varlist                   = "u", "v", "w", "temp","qv","rh","geopot"
+ p_levels                     = 100000, 95000, 85000, 70000, 50000, 30000, 20000, 10000
+ output_grid                  =  .FALSE.
+ stream_partitions_ml         =  1 ! needs to be adapted if num_io_procs is increased
+ remap                        =  1 !0 in case unstructured grid is required
+ reg_lon_def                  = 10.5,0.00625,14.5
+ reg_lat_def                  = 42.3,0.005,44.7
+/
+&run_nml
+ num_lev        = 65,65,65
+ lvert_nest     = .false.
+ dtime          = 20     ! timestep in seconds - 24. for R2B10,
+ ldynamics	= .TRUE.       ! dynamics
+ ltransport     = .true.
+ ntracer        = 5
+ iforcing	= 3
+ ltestcase	= .false.
+ msg_level	= 12 ! 12 delivers more detailed report during integration
+ ltimer         = .true.
+ timers_level   = 10
+ check_uuid_gracefully = .false.
+ output         = "nml"
+ ldass_lhn	= .TRUE.
+/
+&nwp_phy_nml
+lgrayzone_deepconv = .true.,.true.,.false. !
+inwp_gscp	= 2,2,2 !attento ai cambiamenti, 4    la 2mom
+mu_rain         = 0.5
+rain_n0_factor  = 0.1
+inwp_convection = 1,1,1
+lshallowconv_only = .false.,.false.,.true.   !Qui di solito metti false,false, true, ma nella 2mom Daniela mette true su tutti
+inwp_radiation  = 4,4,4
+inwp_cldcover   = 1,1,1
+inwp_turb	= 1,1,5 !5 attiva la diffusione di Smagorinsky, 1 lo schema di COSMO
+inwp_satad	= 1,1,1
+inwp_sso        = 1,1,1 !Con 1 attivo lo schema di Lott e Miller
+inwp_gwd        = 0,0,0 !se lo pongo pari a uno attivo lo schema Orr-Ern-Bechtold
+inwp_surface    = 1,1,1
+latm_above_top  = .true.,.true.,.true.
+ldetrain_conv_prec = .true.,.true.,.true.
+efdt_min_raylfric = 7200.
+itype_z0         = 2
+icapdcycl        = 3
+icpl_aero_conv   = 1
+icpl_aero_gscp   = 1 !Per la 2mom zero, per le altre 1
+icpl_o3_tp	 = 1
+icalc_reff = 100    ! RICORDA: 0 PER 1-MOM, 100 PER 2-MOM
+icpl_rad_reff = 1   !          0 PER 1-MOM, 1   PER 2-MOM
+ithermo_water = 1   !          0 PER 1-MOM, 1   PER 2-MOM
+dt_rad    = 720.,720.,720.
+dt_conv   = 120.,120.,60.  !Valore inziale era 120 s
+dt_sso    = 120.,120.,120.
+dt_gwd    = 120.,120.,120. !Quello base    360 s, si tratta del NON OROGRAPHIC gravity wave drag
+/
+!&twomom_mcrph_nml
+! ccn_type        = 7
+! luse_mu_Dm_rain = .true.  ! Default
+! lturb_enhc	 = .true.  ! Default .false.
+! rain_cmu0	 = -1.0    ! Exponential Distribution for small droplets
+! ecoll_gg_wet    = 0.40    ! Standard 0.4
+! ecoll_gg        = 0.05    ! Standard 0.1
+! Tcoll_gg_wet    = 273.16
+! isnow_stick     = 6	   ! Low limit for Connely
+! Tmax_gr_rime    = 305.16  ! Effectively off
+! avel_g          = 45.32   ! Heyms graupel velocity
+! bvel_g          = 0.26
+!/
+&nwp_tuning_nml
+itune_albedo = 1
+tune_gkwake = 0.25
+tune_gfrcrit = 0.333
+tune_gkdrag = 0.0
+tune_minsnowfrac = 0.3
+tune_box_liq     = 0.04
+tune_box_liq_asy = 4.0
+tune_gust_factor = 7.0
+itune_gust_diag  = 3
+tune_gustsso_lim = 20.
+tune_rcucov = 0.075
+tune_rhebc_land = 0.825
+tune_eiscrit    = 7.
+tune_zvz0i    = 0.85
+tune_sgsclifac = 1.0
+icpl_turb_clc  = 2
+max_calibfac_clcl = 2.0
+/
+&turbdiff_nml
+  tkhmin        = 0.5
+  tkmmin        = 0.75
+  pat_len	= 750.
+  tur_len	= 300.
+  rat_sea	= 0.8
+  ltkesso	= .true.
+  frcsmot	= 0.2   ! these 2 switches together apply vertical smoothing of the TKE source terms
+  imode_frcsmot = 2     ! in the tropics (only), which reduces the moist bias in the tropical lower troposphere
+ ! use horizontal shear production terms with 1/SQRT(Ri) scaling to prevent unwanted side effects:
+  itype_sher    = 2
+  ltkeshs	= .true.
+  a_hshr        = 2.0
+  icldm_turb    = 2
+  q_crit        = 2.0
+  imode_tkesso  = 2
+  alpha1        = 0.125
+  rlam_heat     = 10
+/
+&lnd_nml
+  ntiles         = 3
+  nlev_snow	 = 3
+  lmulti_snow    = .false.
+  itype_heatcond = 3
+  idiag_snowfrac = 20
+  lsnowtile	 = .true.
+  lseaice        = .true.
+  llake          = .true.
+  itype_canopy   = 2   !HO CAMBIATO DA 1 A 2
+  itype_lndtbl   = 4
+  itype_evsl     = 4
+  itype_root     = 2
+  itype_trvg     = 3
+  itype_snowevap = 3
+  cwimax_ml	 = 5.e-4
+  c_soil         = 1.25
+  c_soil_urb     = 0.5
+  sstice_mode    = 2
+/
+!!!CONTROLLA BENE I VALORI DEI GAS SERRA
+&radiation_nml
+  ecrad_data_path = "/home/PERSONALE/matteo.siena4/anaconda3/envs/run_icon1/icon-nwp/externals/ecrad/data"
+  direct_albedo_water = 3
+  albedo_whitecap = 1
+  irad_o3     = 79
+  irad_aero   = 6
+  albedo_type = 2          ! Modis albedo
+  islope_rad  = 0
+  vmr_co2     = 390.e-06   ! Prova, per il 2022 in realtà il valore è 419(420), anche gli altri sono diversi
+  vmr_ch4     = 1800.e-09
+  vmr_n2o     = 322.0e-09
+  vmr_o2      = 0.20946
+  vmr_cfc11   = 240.e-12
+  vmr_cfc12   = 532.e-12
+/
+&nonhydrostatic_nml
+  iadv_rhotheta   = 2
+  ivctype         = 2
+  itime_scheme    = 4
+  exner_expol     = 0.333 !prima era 0.6
+  vwind_offctr    = 0.2
+  damp_height     = 12250.,12250.,12250.
+  rayleigh_coeff  = 5.0,5.0,5.0
+! the following divergence damping settings should also be used in assimilation cycle; the settings used in the global
+! DA cycle might compromise the dynamics of convection
+  divdamp_fac     = 0.004
+  divdamp_order   = 24
+  divdamp_type    = 32
+  divdamp_trans_start = 12500.
+  divdamp_trans_end   = 17500.
+  l_open_ubc	  = .false.
+  igradp_method   = 3
+  l_zdiffu_t	  = .true.
+  thslp_zdiffu    = 0.02
+  thhgtd_zdiffu   = 125.
+  htop_moist_proc = 22500.
+  hbot_qvsubstep  = 22500
+/
+&sleve_nml
+ min_lay_thckn   = 20.
+ itype_laydistr  = 1
+ top_height	 = 22000.
+ stretch_fac     = 0.65
+ decay_scale_1   = 4000.
+ decay_scale_2   = 2500.
+ decay_exp	 = 1.2
+ flat_height     = 16000.
+/
+&dynamics_nml
+ iequations     = 3
+ idiv_method    = 1
+ divavg_cntrwgt = 0.50
+ lcoriolis	= .true.
+/
+&transport_nml
+ ctracer_list = '12345'
+ ivadv_tracer = 3,3,3,3,3,3
+ itype_hlimit = 3,4,4,4,4,4
+ ihadv_tracer = 52,2,2,2,2,2
+ llsq_svd	= .TRUE.
+ beta_fct	= 1.005
+/
+&diffusion_nml
+ hdiff_order	  = 5
+ itype_vn_diffu   = 1
+ itype_t_diffu    = 2
+ hdiff_efdt_ratio = 24
+ hdiff_smag_fac   = 0.025
+ lhdiff_vn        = .true.
+ lhdiff_temp	  = .true.
+ lsmag_3d = .true.,.true.,.true. !(Default false,) cos   utilizzi la formulazione 3d di smago per calcolare il coefficiente di diffusione orizzontale, attento ad attivarlo per ogni dominio in cui usi smago
+ lhdiff_smag_w = .true.,.true.,.true. !(Default  false) Utilizzo addizionale della diffusione di Smagorinsky per w
+/
+&interpol_nml
+  nudge_zone_width = 10
+  nudge_max_coeff  = 0.05  ! use 0.075 in assimilation cycle
+  lsq_high_ord     = 3
+  l_intp_c2l	   = .true.
+  l_mono_c2l	   = .true.
+!  support_baryctr_intp = .true.
+/
+&gridref_nml
+ grf_intmethod_e  = 6
+ grf_intmethod_ct = 2
+ grf_tracfbk	  = 2
+ denom_diffu_v    = 150.
+/
+&extpar_nml
+ itopo                = 1
+ n_iter_smooth_topo   = 1,1,1 !Fai attenzione, ho disattivato lo smoother nel terzo dominio.
+ hgtdiff_max_smooth_topo = 750.,400.,200. ! da namelist Gunther, sembra effetivamente avere un impatto
+ heightdiff_threshold = 2250.,1500.,1000.
+ itype_vegetation_cycle = 2 ! 2 is actually the ICON-D2 setup but needs T2M-CLIM data which is not available from extpar web ui
+ read_nc_via_cdi      = .false.
+ extpar_filename = "/scratch/atmos/matteo.siena4/ICON_in/dominio_nest/external_parameter_icon_domain_DOM<idom>_tiles.nc"

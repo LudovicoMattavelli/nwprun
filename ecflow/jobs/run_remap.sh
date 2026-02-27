@@ -21,7 +21,6 @@ echo "Je suis $SLURM_PROCID de $SLURM_NTASKS avec $SLURM_CPUS_PER_TASK processeu
 # end of setup
 
 set -x
-
 if [ "$PARENTMODEL" = "IFS" ]; then
     # Define name of Arkimet dataset and GRIB input filename for iconremap
     IFS_ds=$(basename $PARENTMODEL_ARKI_DS)
@@ -67,7 +66,7 @@ if [ $SLURM_PROCID -eq 0 ] ; then
       if (indicatorOfParameter == 39 || indicatorOfParameter == 40 || indicatorOfParameter == 41 || indicatorOfParameter == 42) {
         write "soil.[indicatorOfParameter:i].grb";
       } else {
-        if (indicatorOfParameter == 129 || indicatorOfParameter == 173 || indicatorOfParameter == 172|| indicatorOfParameter == 43) {
+        if (indicatorOfParameter == 129 || indicatorOfParameter == 173 || indicatorOfParameter == 172|| indicatorOfParameter == 43 || indicatorOfParameter == 167 || indicatorOfParameter == 168) {
           write "surface_dummy.grb";
         } else {
           write "surface.grb";
@@ -167,7 +166,6 @@ EOF
 
     # Create namelist for iconremap
     conf_template iconremap_IC.nml	
-
     # Run iconremap
     $MODEL_PRE_BINDIR/iconremap -vvv --remap_nml iconremap_IC.nml
 
@@ -225,7 +223,7 @@ else
         # Copy input removing topographies and converting all to GRIB2
 	cat << EOF > topo_g2.filt
         if (editionNumber == 1) {
-          if (indicatorOfParameter == 129 || indicatorOfParameter == 173) {
+          if (indicatorOfParameter == 129 || indicatorOfParameter == 173 || indicatorOfParameter == 167 || indicatorOfParameter == 168) {
             write "surface_dummy.grb";
           } else {
             set editionNumber = 2;

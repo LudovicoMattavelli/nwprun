@@ -1,0 +1,90 @@
+!==============================================================================
+! namelist for MEC
+!==============================================================================
+
+ !===================
+ ! general parameters
+ !===================
+ &run
+   method         = 'MEC'                    ! Model Equivalent Calculator
+   model          = 'ICON'                   ! forecast model
+   data           = "@MEC_WORKDIR@/const"    ! input constant data from working directory (ww15mgh.grd) 
+   input          = '@MEC_WORKDIR@/input'    ! input             data path
+   obsinput       = '@MEC_WORKDIR@/input'    ! observation input data path
+   output         = '@MEC_WORKDIR@/output'   ! output            data to   working directory
+   time_ana       = @DATEE@@TIMEE@0000       ! analysis time  (ccccmmddhhmmss)   
+   time_ref       = @DATES@@TIMES@0000       ! forecast start (ccccmmddhhmmss) 
+   fg_file        = "fg_file"
+   read_fields    = 'ps t u v pf q t2m td2m clct clcl clcm clch'
+   opt_fields     = 'ps h_snow clct clcl clcm clch'
+   grib_library   = 2                        ! GRIB-API used: 1=GRIBEX  2=GRIB2-API
+   invar_det      = '@MEC_WORKDIR@/const/icon_@DATES@@TIMES@_const.grb' ! optional: file with invariant fields
+!   cosmo_refatm   = 2                       ! reference atmosphere to be used for COSMO:1or2
+!   cosmo_ivctype  = 2                       ! vertical coordinate type to be used for COSMO:1to4 
+   grid_file      = '@MEC_WORKDIR@/const/@DOMAIN@.nc'
+ /
+
+ !===============================
+ ! observation related parameters
+ !===============================
+  &observations
+   !---------------------------------------------------
+   ! read from CDFIN files (if not set use mon/cof/ekf)
+   !---------------------------------------------------
+   read_cdfin   = T                          ! (F) read COSMO  CDFIN files
+ /
+
+ !====================
+ ! Ensemble parameters
+ !====================
+ &ENKF
+  k_enkf    = 0                                ! ensemble size
+  det_run   = 1                                ! process deterministic run
+  grid_file = '@MEC_WORKDIR@/const/@DOMAIN@.nc'  
+  invar_ens = '@MEC_WORKDIR@/const/icon_@DATES@@TIMES@_const.grb' 
+ /
+
+ !================================
+ ! Verification related parameters
+ !================================
+ &veri_obs
+  fc_times      = @MODEL_STOP@00             ! forecast lead times (hhmm)
+  tinc_fields   = 100                        ! time increments of model fields (hhmm); with fctime=300
+                                             ! and tinc=100 it takes grib every hour (lff300, lff200, 
+                                             ! 100, 000) so in fc_file i have to put lfffddvvmmss  
+  rm_old        = 2                          ! overwrite entries in verification file ?
+  fc_file       = 'icon_@DATES@@TIMES@_+DDVVMMSS.grb'   ! template for forecast file name
+  prefix_out    = 'ver'
+  ens_suffix    ='._ENS_'                    ! suffix for ensemble file name
+  det_suffix    = ''                         ! suffix for determ. file name
+  fg_check      = 0                          ! quality check switch
+                                             !  0: no QC (quality control)
+                                             !  1: QC against deterministic run
+                                             !  2: QC against ensemble mean
+                                             !  3: QC against all ensemble members
+                                             !  4: check for blacklisting + gross
+  interpolation = -1                         ! time interpolation 
+                                             ! -1: linear
+                                             !  0: nearest leadtime
+                                             ! >0: use nth slot (nearest upper leadtime)
+ /
+
+ &report
+  time_e =     0                             ! (hhmm, inclusive)+
+  time_b =  -@MODEL_STOP@01                             ! (hhmm, exclusive)-
+
+ /
+
+! &rules        ! Commentato
+!  comment = 'set wind observations above 100m passive'
+!   obstype = 1         ! for synop
+!   zlim    = 100 10000 ! above 100m
+!   uv%use  = 7         ! set status of wind observations to 'passive'
+! /
+
+ &cosmo_obs
+   verification_start =  @VSTART@            ! (min, inclusive)
+   verification_end   =     0                ! COSMO time window end   (inclusive)(hhmm)
+   altopsu(1)         =  5000.               ! max height for single level wind observations
+   thairh             =     0.               ! multilevel observation collection
+ /

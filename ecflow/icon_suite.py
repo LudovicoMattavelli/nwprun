@@ -115,6 +115,7 @@ basicenv = BasicEnv(srctree=os.path.join(os.environ["WORKDIR_BASE"], "nwprun"),
 
 conf = ModelConfig({"gts": False, "lhn": True, "membrange": "0",
                     "postprocrange": "0",
+                    "startmethod": "manual",
                     "modelname": "icon", 
                     "runlist": [GetObs, EpsMembers]}).getconf()
 icon = ModelSuite("icon_2I_fcast")

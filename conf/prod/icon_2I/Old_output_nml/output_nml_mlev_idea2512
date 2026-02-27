@@ -1,0 +1,42 @@
+! Complete domain; 2km; model levels; only forecast
+
+&output_nml
+! model levels
+ filetype                     = 2                        ! output format: 2=GRIB2, 4=NETCDFv2
+ dom                          = 1
+ output_time_unit             = 3                        ! output in hours (3) 
+ output_bounds                = @OUTPUT_START@,@MODEL_STOP@,1.       ! start, end, increment
+ steps_per_file               = 1
+ mode                         = 1                        ! 1: forecast mode (relative t-axis), 2: climate mode (absolute t-axis)
+ include_last                 = .FALSE.
+ output_filename              = "@MODEL_DATADIR@/icon_@DATES@@TIMES@00_mlev_all2km_A2Pv"
+ filename_format              = '<output_filename>_+<ddhhmmss>'                   ! file name base
+ ready_file                   = '@MODEL_DATADIR@/icon_@DATES@@TIMES@00_+<ddhhmmss>.rf'
+ ml_varlist                   = 'u','v','temp','pres','qv','w','qc','qi','qr','qs','qg'
+ output_grid                  = .FALSE.
+ stream_partitions_ml         = 1 ! needs to be adapted if num_io_procs is increased
+ remap                        = 1   !0 in case unstructured grid is required                
+ reg_lon_def                  = 9.9,0.025,13.300
+ reg_lat_def                  = 41.8,0.02,45.200
+
+/
+&output_nml
+! Static fields: topo + lsm + hlayers
+ filetype                     = 2                        ! output format: 2=GRIB2, 4=NETCDFv2
+ dom                          = 1                                                       
+ output_time_unit             = 3                        ! output in hours (3) 
+ output_bounds                = 0.,0.,1.                 ! start, end, increment        
+ steps_per_file               = 1                                                      
+ mode                         = 1                        ! 1: forecast mode (relative t-axis), 2: climate mode (absolute t-axis)
+ include_last                 = .FALSE.                                                         
+ output_filename              = "@MODEL_DATADIR@/icon_@DATES@@TIMES@00_staticmlev_all2km_A2P0"
+ filename_format              = '<output_filename>_+<ddhhmmss>'                   ! file name base
+ ready_file                   = '@MODEL_DATADIR@/icon_@DATES@@TIMES@00_+<ddhhmmss>.rf'
+ ml_varlist                   = 'z_mc'
+ output_grid                  = .FALSE.
+ stream_partitions_ml         = 1 ! needs to be adapted if num_io_procs is increased         
+ remap                        = 1   !0 in case unstructured grid is required                
+ reg_lon_def                  = 9.9,0.025,13.300
+ reg_lat_def                  = 41.8,0.02,45.200
+/
+! manca lama analisi

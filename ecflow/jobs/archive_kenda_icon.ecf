@@ -1,5 +1,6 @@
 %include <sched_archive.h>
 %include <head.h>
+echo "L251219 Al momento devo ancora aggiungere il 3 Dominio"
 
 # module load singularity || true
 # source other optional modules
@@ -59,7 +60,16 @@ archive_perm() {
         fgfile=$WORKDIR/icon/data/icon_${DATES}${TIMES}00_+000${lt_hh}${lt_mm}00.grb
         fgfile_out=icon_${DATES}${TIMES}00_+000${lt_hh}${lt_mm}00_det.grb
         rsync -pt $fgfile $CINECA_ARCHIVE_POST/$subdir/$fgfile_out  || true
-
+	#inizio V:
+	fgfile=$WORKDIR/icon/data/icon_${DATES}${TIMES}00_+000${lt_hh}${lt_mm}00.grb
+        fgfile_out=icon_${DATES}${TIMES}00_+000${lt_hh}${lt_mm}00_det.grb
+        rsync -pt $fgfile $CINECA_ARCHIVE_POST/$subdir/$fgfile_out  || true
+        if [ "$NESTING" == "Y" ]; then
+            fgfile=$WORKDIR/icon/data/icon_${DATES}${TIMES}00_+000${lt_hh}${lt_mm}00_DOM02.grb
+            fgfile_out=icon_${DATES}${TIMES}00_+000${lt_hh}${lt_mm}00_DOM02_det.grb
+            rsync -pt $fgfile $CINECA_ARCHIVE_POST/$subdir/$fgfile_out  || true
+        fi
+	#fine V
         # Save ensemble first guess
         if [ "$TIME" = "21" ]; then
             for n in `seq 1 $ENS_TOTAL_MEMB`; do
@@ -68,11 +78,18 @@ archive_perm() {
                 fgfile_out=icon_${DATES}${TIMES}00_+000${lt_hh}${lt_mm}00_${n3}.grb
                 rsync -pt $fgfile $CINECA_ARCHIVE_POST/$subdir/$fgfile_out || true
                 done
+            # Same for nesting
+            if [ "$NESTING" == "Y" ]; then
+                 fgfile=$WORKDIR/icon.$n/data/icon_${DATES}${TIMES}00_+000${lt_hh}${lt_mm}00_DOM02.grb
+                 fgfile_out=icon_${DATES}${TIMES}00_+000${lt_hh}${lt_mm}00_DOM02_${n3}.grb
+                 rsync -pt $fgfile $CINECA_ARCHIVE_POST/$subdir/$fgfile_out || true
             fi
+
+	fi
 
         # Save ekf files for diagnostics
         rsync -pt $LETKF_WORKDIR/ekf* $CINECA_ARCHIVE_POST/$subdir || true
-    fi
+  fi
 }
 
 set -x

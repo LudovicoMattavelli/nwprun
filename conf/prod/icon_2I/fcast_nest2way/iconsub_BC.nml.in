@@ -1,0 +1,11 @@
+&iconsub_nml
+  grid_filename    = '@LOCALGRID@'
+  output_type      = 4
+  lwrite_grid      = .TRUE.
+/
+&subarea_nml
+  order            = 'lateral_boundary'
+  grf_info_file    = '@LOCALGRID@'
+  min_refin_c_ctrl = 1
+  max_refin_c_ctrl = 14
+/
