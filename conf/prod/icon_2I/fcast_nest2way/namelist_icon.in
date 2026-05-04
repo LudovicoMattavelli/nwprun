@@ -1,4 +1,4 @@
-! MS namelist riadattata. No smago, no TU, shallow (TTF)
+! Namelist riadattata da Litt2. TUOFF
 &limarea_nml
 ! fac_latbc_presbiascor       = 1
  latbc_varnames_map_file     = "map_file.latbc"
@@ -85,10 +85,7 @@
 ! ------------------------------------------------------------------------------------------
 ! OUTPUT: surface fields
 ! ------------------------------------------------------------------------------------------
-! INCLUDE output_nml_nest3_main !questo prima funzionava
-!INCLUDE output_nml_test
-@INCLUDE output_nml_domain_Nest500_from_OPE2km_to_EM500m_v1_DOM01@
-@INCLUDE output_nml_domain_Nest500_from_OPE2km_to_EM500m_v1_DOM02@
+! INCLUDE output_nml_domain_Nest500_from_OPE2km_to_EM500m_v1_DOM01
 @INCLUDE output_nml_domain_Nest500_from_OPE2km_to_EM500m_v1_DOM03@
 &run_nml
  num_lev                     = 65,65,65 ! L credo funzioni anche se ne lascio solo 1 quando solo uguali. Questo vale per tuttii parametri perchè Virginia aveva fatto così
@@ -114,7 +111,7 @@ inwp_gscp                    = 2,2,2 !attento ai cambiamenti,
 mu_rain                      = 0.5
 rain_n0_factor               = 0.1
 inwp_convection              = 1,1,1
-lshallowconv_only            = .false.,.false.,.false.   !Qui di solito metti false,false, true, ma nella 2mom Daniela mette true su tutti !Virginia aveva messo solo true
+lshallowconv_only            = .true.,.true.,.true.   !Qui di solito metti false,false, true, ma nella 2mom Daniela mette true su tutti !Virginia aveva messo solo true
 inwp_radiation               = 4,4,4
 inwp_cldcover                = 1,1,1
 inwp_turb                    = 1,1,1 !5 attiva la diffusione di Smagorinsky, 1 lo schema di COSMO
@@ -137,6 +134,7 @@ dt_rad    = 720.,720.,720.
 dt_conv   = 120.,120.,60.  !Valore inziale era 120 s
 dt_sso    = 120.,120.,120.
 dt_gwd    = 120.,120.,120. !Quello base    360 s, si tratta del NON OROGRAPHIC gravity wave drag
+lsgs_cond = .true.,.true.,.false. !L260330 litt2 
 /
 
 ! L: commentato già da Matteo
@@ -172,10 +170,11 @@ max_calibfac_clcl = 2.0
 ! tune_supsat_limfac           = 2. ! C'è nell'ope ma non in V o MS
 ! tune_zcsg                    = 0.25 ! C'è nell'ope ma non in V o MS
 ! tune_v0snow                  = 20. ! C'è nell'ope ma non in V o MS
-! Le prossime 3 non ci sono nell'ope
-itune_gust_diag  = 3
-tune_gustsso_lim = 20.
-tune_eiscrit    = 7.
+! Le prossime da Litt2
+itune_slopecorr = 1
+itune_gust_diag = 4 
+tune_gustlim_agl = 1500 
+tune_gustlim_fac = 1.75,1.5,1.2
 /
 
 &turbdiff_nml
@@ -193,7 +192,7 @@ tune_eiscrit    = 7.
   a_hshr        = 2.0
   icldm_turb    = 2
   q_crit        = 2.0
-  imode_tkesso  = 2
+  imode_tkesso  = 3
   alpha1        = 0.125
   rlam_heat     = 10
 /
@@ -217,11 +216,6 @@ tune_eiscrit    = 7.
   c_soil_urb     = 0.5
   sstice_mode    = 2
   lterra_urb     = .false.  !switch TERRA_URB
-  lurbalb        = .true. !L: inizio mia parte
-  itype_ahf      = 2      !L: se metto 2 cosa succede?
-  itype_kbmo     = 2      !L: added by me
-  itype_eisa     = 3      !L: idem
-
 /
 
 &radiation_nml
@@ -247,7 +241,7 @@ tune_eiscrit    = 7.
   exner_expol     = 0.333 !L: prima era 0.6, cambiato da M
   vwind_offctr    = 0.2
   damp_height     = 12250.,12250.,12250.
-  rayleigh_coeff  = 5.0,5.0,5.0
+  rayleigh_coeff  = 5.0,8.0,12.0  !Litt2
 ! the following divergence damping settings should also be used in assimilation cycle; the settings used in the global
 ! DA cycle might compromise the dynamics of convection
   divdamp_fac     = 0.004
@@ -280,7 +274,7 @@ tune_eiscrit    = 7.
 ! idiv_method    = 1
  divavg_cntrwgt = 0.50
  lcoriolis      = .true.
-!  lmoist_thdyn   = .false. ! C'è nell'ope ma non in MS
+ lmoist_thdyn   = .false. ! Ope e Litt2
 /
 
 &transport_nml
@@ -300,8 +294,8 @@ tune_eiscrit    = 7.
  hdiff_smag_fac   = 0.025
  lhdiff_vn        = .true.
  lhdiff_temp      = .true.
-! lsmag_3d = .true.,.true.,.true. !(Default false,) cos   utilizzi la formulazione 3d di smago per calcolare il coefficiente di diffusione orizzontale, attento ad attivarlo per ogni dominio in cui usi smago
-! lhdiff_smag_w = .true.,.true.,.true. !(Default  false) Utilizzo addizionale della diffusione di Smagorinsky per w
+ lsmag_3d = .true.,.true.,.true. !(Default false,) cos   utilizzi la formulazione 3d di smago per calcolare il coefficiente di diffusione orizzontale, attento ad attivarlo per ogni dominio in cui usi smago
+ lhdiff_smag_w = .true.,.true.,.true. !(Default  false) Utilizzo addizionale della diffusione di Smagorinsky per w
 /
 !GLi utlimi due li metto solo se uso Smagorinsky
 

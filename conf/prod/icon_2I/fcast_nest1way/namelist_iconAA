@@ -1,6 +1,6 @@
-! config_litt3_lev97:
+! config_litt3:
 ! Namelist per run a 500m. Namelist operativa con modifiche di litt3 + su extpar_nml (msiena) e su nwp_tuning (V e MS).
-! TERRA_URB OFF. 97 livelli (come in Algrim2025)
+! TERRA_URB acceso.
 &limarea_nml
 ! fac_latbc_presbiascor       = 1
  latbc_varnames_map_file     = "map_file.latbc"
@@ -87,11 +87,10 @@
 ! ------------------------------------------------------------------------------------------
 ! OUTPUT: include predefined templates
 ! ------------------------------------------------------------------------------------------
-@INCLUDE output_nml_domain_Nest500_from_EM500mv1_to_EM125m_GLBC_v0_DOM02@
+@INCLUDE output_nml_domain_Nest500_from_OPE2km_to_EM500m_v1_DOM03@
 @INCLUDE output_nml_main_ICBC@
-@INCLUDE output_nml_tke_high_freq@
 &run_nml
- num_lev                     = 97 !lev97 was 65
+ num_lev                     = 65
  lvert_nest                  = .false.
  dtime                       = @TIME_STEP@          ! timestep in seconds - 24. for R2B10,
  ldynamics                   = .TRUE.       ! dynamics
@@ -200,7 +199,11 @@ tune_gustlim_fac             = 1.2
   c_soil         = 1.25
   c_soil_urb     = 0.5
   sstice_mode    = 2
-  lterra_urb     = .false.  !switch TERRA_URB
+  lterra_urb     = .true.  !switch TERRA_URB
+  lurbalb        = .true. !L: inizio switch urbani
+  itype_ahf      = 2      
+  itype_kbmo     = 2     
+  itype_eisa     = 3      
 /
 
 &radiation_nml

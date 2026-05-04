@@ -1,0 +1,68 @@
+&input_field_nml  ! pressure
+ inputname      = "P"
+ outputname     = "P"
+ intp_method = 3
+/
+&input_field_nml  ! horiz. wind comp. u
+ inputname      = "U"
+ outputname     = "U"
+ intp_method = 3
+/
+&input_field_nml  ! horiz. wind comp. v
+ inputname      = "V"
+ outputname     = "V"
+ intp_method = 3
+/
+&input_field_nml  ! vertical velocity
+ inputname      = "W"
+ outputname     = "W"
+ intp_method = 3
+/
+&input_field_nml  ! temperature
+ inputname      = "T"
+ outputname     = "T"
+ intp_method = 3
+/
+&input_field_nml  ! specific humidity
+ inputname      = "QV"
+ outputname     = "QV"
+ intp_method = 3
+/
+&input_field_nml  ! cloud liquid water content
+ inputname      = "QC"
+ outputname     = "QC"
+ intp_method = 3
+/
+&input_field_nml  ! cloud ice content
+ inputname      = "QI"
+ outputname     = "QI"
+ intp_method = 3
+/
+&input_field_nml  ! rain water content
+ inputname      = "QR"
+ outputname     = "QR"
+ intp_method = 3
+/
+&input_field_nml  ! snow water content
+ inputname      = "QS"
+ outputname     = "QS"
+ intp_method = 3
+/
+&input_field_nml
+ inputname      = "HHL"         
+ outputname     = "HHL"          
+ intp_method    = 3
+ loptional      = .TRUE.
+/
+
+FRESHSNW   
+H_ICE      
+QV_S       
+RHO_SNOW   
+T_G        
+T_ICE      
+T_SNOW     
+T_SO       
+W_I        
+W_SNOW     
+W_SO       

@@ -1,0 +1,24 @@
+================================
+## CHECK LIST pre esperimenti
+===============================
+
+Prima di far girare un esperimento devo assicurarmi di ver fatto le seguenti cose.
+### namelist_icon.in
+- controllo namelist ...
+### conf.sh
+- modello e griglia corretta
+- se in 1waynesting, anche la namelist deve essere adeguata (es.
+- MODEL_STOP e TIME_STEP corretti
+### Output
+- Nel file di namelist devo INCLUDE l'output_nml correto
+- Nell'output_nml devo:
+	- aver selezionato il dominio corretto (1 se standard, diverso se in modalità 2wayNesting)
+	- rimappare sull'area e con la spaziatura aggiornata
+	- avere tutte le variabili che mi interessano nel file di uscita
+	- se cambio il nlev, devo cambiarlo anche nell'output mlev
+### Suite
+- Il Wall time sia sufficientemente grande da permettermi di fare l'esperimento
+### 2way nesting
+- Nell'output_nml cambia sia il numero del dominio, sia l"output_bounds (il dominio innestato non può partire da 0)
+
+

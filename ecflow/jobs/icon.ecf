@@ -18,11 +18,15 @@ cp $ECRAD_DATA/ECHAM6_CldOptProps.nc $MODEL_WORKDIR
 
 #V: Copy RTTOV coefficient files for synsat_nml
 #V: cp $MODEL_BASE/data/rttov/const/rt13coeffs_rttov7pred54L/*msg* $MODEL_WORKDIR #L20251216 al momento mi da problemi perchè nel mio icon non c'è
-echo "L251219 Al momento devo ancora aggiungere il 3 Dominio"
 # Run ICON
+echo "Inizio LUDO echo"
+echo $PARENTMODEL_STATIC
+echo "pausa"
+echo $PARENTMODEL_GRIDFILE
+echo $PARENTMODEL_STATICFILE
+echo "Fine LUDO echo"
 $ecflow_client --event=started # trigger start of postproc
 parcomp_mpirun $EXTRA_MPIRUN $MODEL_BIN
-echo "test2"
 # Archive first guess for next ICON assimilation cycle
 if [ -n "$MODEL_ARCHIVE_OUTPUT_ANA" ]; then
     # Retrieve first guess lead time

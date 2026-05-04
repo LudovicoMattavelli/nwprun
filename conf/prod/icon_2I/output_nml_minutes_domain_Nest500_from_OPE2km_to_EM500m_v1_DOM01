@@ -1,43 +1,39 @@
 &output_nml
+! Surface
  filetype                     = 2                        ! output format: 2=GRIB2, 4=NETCDFv2
  dom                          = 1
- output_time_unit             = 3                        ! output in hours (3) 
- output_bounds                = 0.,@MODEL_STOP@,3.       ! start, end, increment
+ output_time_unit             = 2                        ! output in hours (3)
+ output_bounds                = 10.,50.,5.       ! start, end, increment
  steps_per_file               = 1
  mode                         = 1                        ! 1: forecast mode (relative t-axis), 2: climate mode (absolute t-axis)
  include_last                 = .FALSE.
- output_filename              = "@MODEL_DATADIR@/icon_@DATES@@TIMES@00_icbc_IC"
+ output_filename              = "@MODEL_DATADIR@/icon_@DATES@@TIMES@00_surf_2km"
  filename_format              = '<output_filename>_+<ddhhmmss>'                   ! file name base
  ready_file                   = '@MODEL_DATADIR@/icon_@DATES@@TIMES@00_+<ddhhmmss>.rf'
- ml_varlist                   = 'pres','qc','qi','qr','qs','qv','temp','u','v','w',
-'qv_s','t_g','w_i',
-'freshsnow','rho_snow','t_snow','w_snow','h_ice','t_ice',
-'t_so',								!w_so,
-'fr_seaice','w_so_ice','c_t_lk','h_ml_lk','t_bot_lk','t_mnw_lk','t_wml_lk',
-'h_snow','z_ifc','gz0','smi','plantevap','alb_si',
-'qg'
+ ml_varlist                   = 't_2m'
  output_grid                  = .FALSE.
  stream_partitions_ml         = 1 ! needs to be adapted if num_io_procs is increased
- remap                        = 0   !0 in case unstructured grid is required                
+ remap                        = 1   !0 in case unstructured grid is required
+ reg_lon_def                  = 2.65,0.025,22.35 ! 2.7,0.025,22.3 !aggiungo 2 punti (x eccesso) x vedere cosa succede ai bordi
+ reg_lat_def                  = 33.46,0.02,49.14 ! 33.5,0.02,49.1
 /
 &output_nml
+! Pressure levels
  filetype                     = 2                        ! output format: 2=GRIB2, 4=NETCDFv2
  dom                          = 1
- output_time_unit             = 3                        ! output in hours (3)
- output_bounds                = 1.,@MODEL_STOP@,1.
+ output_time_unit             = 2                     ! output in hours (3)
+ output_bounds                = 10.,50.,5.       ! start, end, increment
  steps_per_file               = 1
  mode                         = 1                        ! 1: forecast mode (relative t-axis), 2: climate mode (absolute t-axis)
  include_last                 = .FALSE.
- output_filename              = "@MODEL_DATADIR@/icon_@DATES@@TIMES@00_icbc_BC"
+ output_filename              = "@MODEL_DATADIR@/icon_@DATES@@TIMES@00_plev_2km"
  filename_format              = '<output_filename>_+<ddhhmmss>'                   ! file name base
  ready_file                   = '@MODEL_DATADIR@/icon_@DATES@@TIMES@00_+<ddhhmmss>.rf'
- ml_varlist                   = 'pres','qc','qi','qr','qs','qv','temp','u','v','w',
-'qv_s','t_g','w_i',
-'freshsnow','rho_snow','t_snow','w_snow','h_ice','t_ice',
-'t_so',
-'qg'  !,w_so
+ pl_varlist                   = 'u','v','temp'
+ p_levels                     = 25000.,50000.,70000.,85000.,92500.,100000.
  output_grid                  = .FALSE.
  stream_partitions_ml         = 1 ! needs to be adapted if num_io_procs is increased
- remap                        = 0   !0 in case unstructured grid is required
+ remap                        = 1   !0 in case unstructured grid is required
+ reg_lon_def                  = 2.65,0.025,22.35 ! 2.7,0.025,22.3 !aggiungo 2 punti (x eccesso) x vedere cosa succede ai bordi
+ reg_lat_def                  = 33.46,0.02,49.14 ! 33.5,0.02,49.1
 /
-

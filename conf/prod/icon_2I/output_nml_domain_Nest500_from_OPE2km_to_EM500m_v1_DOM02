@@ -64,7 +64,7 @@
  reg_lat_def                  = 43.21,0.01,47.65 ! 41.23,0.01,47.63
 /
 &output_nml
- ! Static fields: topo + lsm + hlayers
+! Static fields: topo + lsm + hlayers
  filetype                     = 2                        ! output format: 2=GRIB2, 4=NETCDFv2
  dom                          = 1
  output_time_unit             = 3                        ! output in hours (3)
@@ -72,13 +72,13 @@
  steps_per_file               = 1
  mode                         = 1                        ! 1: forecast mode (relative t-axis), 2: climate mode (absolute t-axis)
  include_last                 = .FALSE.
- output_filename              = "@MODEL_DATADIR@/icon_@DATES@@TIMES@00_zifc_500m"
+ output_filename              = "@MODEL_DATADIR@/icon_@DATES@@TIMES@00_zifc_1km"
  filename_format              = '<output_filename>_+<ddhhmmss>'                   ! file name base
  ready_file                   = '@MODEL_DATADIR@/icon_@DATES@@TIMES@00_+<ddhhmmss>.rf'
  ml_varlist                   = 'z_ifc'
  output_grid                  = .FALSE.
  stream_partitions_ml         = 1 ! needs to be adapted if num_io_procs is increased
- remap                        = 1   !0 in case unstructured grid is required
+ remap                        = 1   !0 in case unstructured grid is require
  reg_lon_def                  = 5.97,0.012,15.83 ! 6,0.012,15.8 ! aggiungo 2 punti (x eccesso) x vedere cosa succede ai bordi
  reg_lat_def                  = 43.21,0.01,47.65 ! 41.23,0.01,47.63
 /

@@ -1,4 +1,4 @@
-! Schema urbano TERRA_URB attivo (TUON)
+! Schema urbano TERRA_URB attivo (TUOFF). 2km
 &limarea_nml
 ! fac_latbc_presbiascor       = 1
  latbc_varnames_map_file     = "map_file.latbc"
@@ -77,8 +77,7 @@
 ! ------------------------------------------------------------------------------------------
 ! OUTPUT: include predefined templates
 ! ------------------------------------------------------------------------------------------
-@INCLUDE output_nml_domain_Nest500_from_OPE2km_to_EM500m_v1_DOM01@
-@INCLUDE output_nml_main_ICBC@
+@INCLUDE output_nml_control@
 &run_nml
  num_lev                     = 65
  lvert_nest                  = .false.
@@ -183,12 +182,7 @@ tune_v0snow                  = 20.
   c_soil         = 1.25
   c_soil_urb     = 0.5
   sstice_mode    = 2
-  lterra_urb     = .true.  !switch TERRA_URB
-  lurbalb        = .true. !L: inizio mia parte
-  itype_ahf      = 2      !L: se metto 2 cosa succede?
-  itype_kbmo     = 2      !L: added by me
-  itype_eisa     = 3      !L: idem
-
+  lterra_urb     = .false.  !switch TERRA_URB
 /
 
 &radiation_nml

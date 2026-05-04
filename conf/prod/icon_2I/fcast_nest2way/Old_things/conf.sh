@@ -1,10 +1,10 @@
 # Model environment variables
-#MODEL_BASE=$WORKDIR_BASE/srcintel/icon-nwp_terra-urb-2025-11-13
+MODEL_BASE=$WORKDIR_BASE/srcintel/icon-nwp_terra-urb-2025-11-13
 #icon-nwp_terra-urb-2025-11-13
 #MODEL_BASE=/ind2/meteo/a07smr03/lami/srcintel/icon_2024-10
-#MODEL_BIN=$MODEL_BASE/bin/icon
+MODEL_BIN=$MODEL_BASE/bin/icon
 #MODEL_STATIC=$WORKDIR_BASE/data/icon
-#ECRAD_DATA=$MODEL_BASE/data
+ECRAD_DATA=$MODEL_BASE/data
 #MODEL_PRE_BINDIR=/ind2/meteo/a07smr03/lami/srcintel/icontools-2.5.0/icontools #L20251218: li lascio o li tolgo?
 #PARENTMODEL_DATADIR=$WORKDIR/input/data #L20251218: idem
 
@@ -20,7 +20,7 @@ PARENTMODEL_FREQFC=1
 MODEL_STATIC=$WORKDIR_BASE/data/icon
 NESTING=Y
 #MODEL_STATIC=/g100_work/smr_prod/data
-DOMAIN=Nest500_from_OPE2km_to_EM500m_GLBC_v1
+DOMAIN=Nest500_from_OPE2km_to_EM500m_v1
 LOCALGRID=$MODEL_STATIC/domain_$DOMAIN/${DOMAIN}_DOM01.nc
 LOCALGRID_NEST=$MODEL_STATIC/domain_$DOMAIN/${DOMAIN}_DOM02.nc
 LOCALGRID_NEST_NEST=$MODEL_STATIC/domain_$DOMAIN/${DOMAIN}_DOM03.nc # Aggiunto per n500m
@@ -30,7 +30,7 @@ LOCALGRID_EXTERNAL="$MODEL_STATIC/domain_$DOMAIN/${DOMAIN}_DOM<idom>_external_pa
 
 # Model environment variables
 MODEL_BACK=0
-MODEL_STOP=24
+MODEL_STOP=12
 MODEL_BCANA=N
 MODEL_FREQINI=12
 ENS_TOTAL_MEMB=0

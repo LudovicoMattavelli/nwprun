@@ -48,7 +48,6 @@ signal_loop() {
 
 
 set_import_signal_method $PARENTMODEL_ARKI_DS
-
 case "%SUITE%" in
     *reassim*)
         . $NWPCONFBINDIR/cosmo_model.sh
@@ -115,7 +114,8 @@ case "%SUITE%" in
 	;;
 
 esac
-
+# L260415 trucca_grib Modifiche per il trucca grib
+#echo "ATTENZIONE: Stai truccando i file di IC"
 if [ -n "$ADD_ICE_FIELDS" ]; then
     anafile=`inputmodel_name 0`
     grib_set -w discipline=10,parameterCategory=2,parameterNumber=1 -S \

@@ -1,6 +1,4 @@
-! config_litt3_lev97:
-! Namelist per run a 500m. Namelist operativa con modifiche di litt3 + su extpar_nml (msiena) e su nwp_tuning (V e MS).
-! TERRA_URB OFF. 97 livelli (come in Algrim2025)
+! MS namelist riadattata. No smago, no TU, shallow (TTF)
 &limarea_nml
 ! fac_latbc_presbiascor       = 1
  latbc_varnames_map_file     = "map_file.latbc"
@@ -22,25 +20,31 @@
  num_io_procs                = 10                ! may be more if frequent output is written
  num_restart_procs           = 0
  num_prefetch_proc           = 1
- iorder_sendrecv             = 3
+! itype_comm                  = 1
+! iorder_sendrecv             = 3
 /
 
 &grid_nml
- dynamics_grid_filename      =  '@LOCALGRID@',
- radiation_grid_filename     =  '@LOCALGRID_PARENT@',
- dynamics_parent_grid_id     = 0,1
- lredgrid_phys               = .true.
+ dynamics_grid_filename      = '@LOCALGRID@','@LOCALGRID_NEST@','@LOCALGRID_NEST_NEST@'
+ radiation_grid_filename     = '@LOCALGRID_PARENT@',
+ dynamics_parent_grid_id     = 0,1,2,3
+ lredgrid_phys               = .true.,.true.,.true.
  lfeedback                   = .true.
  l_limited_area              = .true.
  ifeedback_type              = 2
-! start_time                  = 0.,             ! irrelevant without nesting
+ start_time                  = 0.,900.,1800.          ! irrelevant without nesting
 /
+
 &initicon_nml
- init_mode                   = 7 ! @INIT_MODE@      ! 7 when init. from ICON, 2 from IFS
+ init_mode                   = @INIT_MODE@      ! 7 when init. from ICON, 2 from IFS
  zpbl1                       = 500.
  zpbl2                       = 1000.
  lread_ana                   = @LREAD_ANA@      ! true if analysis increments are read
- dwdfg_filename              = "@MODEL_PRE_DATADIR@/ic_@DATES@@TIMES@.nc"
+ lp2cintp_incr               = .true.           ! parent-to-child-interpolation
+ lp2cintp_sfcana             = .true.           ! of analyses (DET:.false.;EPS:.true.)
+ ifs2icon_filename           = "@MODEL_PRE_DATADIR@/ic_@DATES@@TIMES@.nc" 
+ dwdfg_filename              = "@MODEL_PRE_DATADIR@/@FILEFG@"
+ dwdana_filename             = "@MODEL_PRE_DATADIR@/@FILEAN@"
  filetype                    = @FILETYPE@
  ana_varnames_map_file       = "map_file.ana"
  ltile_coldstart             = @LTILE@
@@ -62,36 +66,32 @@
  itype_rh                    = 1
 ! output_nml_dict            = 'map_file.fc'
  lmask_boundary              = .true.           ! false in assimilation cycle
- wshear_uv_heights           = 6000.,-1.,-1.
+! wshear_uv_heights           = 6000.,-1.,-1.	! L251219: lascio o tolgo? Da MSiena non c'è. Cosa c'è nell operativo? E why?
 /
 
 &gribout_nml
  generatingCenter            = 80
  generatingSubcenter         = 255
- generatingProcessIdentifier = @MODEL_FCI2I_GP@
+ generatingProcessIdentifier = @MODEL_FCAST_GP@
  localtablesversion          = 0
 ! see mo_gribout_nml.f90 for preset behavior
- preset                      = 'deterministic'
+ preset                      = 'deterministic' ! V:'none'
+! typeOfGeneratingProcess     = 2
+! localDefinitionNumber       = 0
+! typeOfProcessedData         = 1
+
 /
 
-&gribout_nml
- generatingCenter            = 80
- generatingSubcenter         = 255
- generatingProcessIdentifier = @MODEL_FCI2I_GP@
- localtablesversion          = 0
-! see mo_gribout_nml.f90 for preset behavior
- preset                      = 'deterministic'
-/
-
-
 ! ------------------------------------------------------------------------------------------
-! OUTPUT: include predefined templates
+! OUTPUT: surface fields
 ! ------------------------------------------------------------------------------------------
-@INCLUDE output_nml_domain_Nest500_from_EM500mv1_to_EM125m_GLBC_v0_DOM02@
-@INCLUDE output_nml_main_ICBC@
-@INCLUDE output_nml_tke_high_freq@
+! INCLUDE output_nml_nest3_main !questo prima funzionava
+!INCLUDE output_nml_test
+@INCLUDE output_nml_domain_Nest500_from_OPE2km_to_EM500m_v1_DOM01@
+@INCLUDE output_nml_domain_Nest500_from_OPE2km_to_EM500m_v1_DOM02@
+@INCLUDE output_nml_domain_Nest500_from_OPE2km_to_EM500m_v1_DOM03@
 &run_nml
- num_lev                     = 97 !lev97 was 65
+ num_lev                     = 65,65,65 ! L credo funzioni anche se ne lascio solo 1 quando solo uguali. Questo vale per tuttii parametri perchè Virginia aveva fatto così
  lvert_nest                  = .false.
  dtime                       = @TIME_STEP@          ! timestep in seconds - 24. for R2B10,
  ldynamics                   = .TRUE.       ! dynamics
@@ -109,58 +109,73 @@
 /
 
 &nwp_phy_nml
-lgrayzone_deepconv           = .false.
-inwp_gscp                    = 2,2,
+lgrayzone_deepconv           = .false.,.false.,.false. ! Virginia aveva lasciato false per tutti
+inwp_gscp                    = 2,2,2 !attento ai cambiamenti, 
 mu_rain                      = 0.5
 rain_n0_factor               = 0.1
-inwp_convection              = 1
-lshallowconv_only            = .true.
-inwp_radiation               = 4
-inwp_cldcover                = 1
-inwp_turb                    = 1
-inwp_satad                   = 1
-inwp_sso                     = 1
-inwp_gwd                     = 0
-inwp_surface                 = 1
-latm_above_top               = .true.
-ldetrain_conv_prec           = .true.
-efdt_min_raylfric            = 7200.
-itype_z0                     = 2
-icapdcycl                    = 3
-icpl_aero_conv               = 1
-icpl_aero_gscp               = 1
-icpl_o3_tp                   = 1
-dt_rad                       = 720.
-dt_conv                      = 60., !L260110 msiena
-dt_sso                       = 120.,
-dt_gwd                       = 120.,
-lvariable_rain_n0            = .true.
-lsgs_cond 		     = .false. !L260413 litt3  ! Switching off condensation heat at 2nd child (>1km)
+inwp_convection              = 1,1,1
+lshallowconv_only            = .false.,.false.,.false.   !Qui di solito metti false,false, true, ma nella 2mom Daniela mette true su tutti !Virginia aveva messo solo true
+inwp_radiation               = 4,4,4
+inwp_cldcover                = 1,1,1
+inwp_turb                    = 1,1,1 !5 attiva la diffusione di Smagorinsky, 1 lo schema di COSMO
+inwp_satad      = 1,1,1
+inwp_sso        = 1,1,1 !Con 1 attivo lo schema di Lott e Miller
+inwp_gwd        = 0,0,0 !se lo pongo pari a uno attivo lo schema Orr-Ern-Bechtold
+inwp_surface    = 1,1,1
+latm_above_top  = .true.,.true.,.true.
+ldetrain_conv_prec = .true.,.true.,.true.
+efdt_min_raylfric = 7200.
+itype_z0         = 2
+icapdcycl        = 3
+icpl_aero_conv   = 1
+icpl_aero_gscp   = 1 !Per la 2mom zero, per le altre 1
+icpl_o3_tp       = 1
+!icalc_reff = 100    ! RICORDA: 0 PER 1-MOM, 100 PER 2-MOM !VIrginia non l'aveva
+!icpl_rad_reff = 1   !          0 PER 1-MOM, 1   PER 2-MOM !idem
+!ithermo_water = 1   !          0 PER 1-MOM, 1   PER 2-MOM !idem
+dt_rad    = 720.,720.,720.
+dt_conv   = 120.,120.,60.  !Valore inziale era 120 s
+dt_sso    = 120.,120.,120.
+dt_gwd    = 120.,120.,120. !Quello base    360 s, si tratta del NON OROGRAPHIC gravity wave drag
 /
+
+! L: commentato già da Matteo
+!&twomom_mcrph_nml
+! ccn_type        = 7
+! luse_mu_Dm_rain = .true.  ! Default
+! lturb_enhc     = .true.  ! Default .false.
+! rain_cmu0      = -1.0    ! Exponential Distribution for small droplets
+! ecoll_gg_wet    = 0.40    ! Standard 0.4
+! ecoll_gg        = 0.05    ! Standard 0.1
+! Tcoll_gg_wet    = 273.16
+! isnow_stick     = 6      ! Low limit for Connely
+! Tmax_gr_rime    = 305.16  ! Effectively off
+! avel_g          = 45.32   ! Heyms graupel velocity
+! bvel_g          = 0.26
+!/
+
 &nwp_tuning_nml
-tune_sgsclifac               = 1
-itune_albedo                 = 1
-tune_gkwake                  = 0.25
-tune_zvz0i                   = 0.85
-tune_box_liq                 = 0.04
-tune_rhebc_land              = 0.825
-tune_rcucov                  = 0.075
-tune_gfrcrit                 = 0.333
-tune_gkdrag                  = 0.0
-tune_minsnowfrac             = 0.3
-tune_box_liq_asy             = 4
-tune_gust_factor             = 7
-icpl_turb_clc                = 2
-max_calibfac_clcl            = 2
-!L260413 litt3
-itune_slopecorr              = 1
-itune_gust_diag              = 4   
-tune_gustlim_agl 	     = 1500
-tune_gustlim_fac             = 1.2 
-!L260215 i seguenti 3 c'erano nell'ope ma non in MS o V
-!tune_supsat_limfac           = 2.  !erano commentati da V
-!tune_zcsg                    = 0.25 !erano commentati da V
-!tune_v0snow                  = 20. !erano commentati da V
+tune_sgsclifac = 1.0
+itune_albedo = 1
+tune_gkwake = 0.25
+tune_zvz0i    = 0.85
+tune_box_liq     = 0.04
+tune_rhebc_land = 0.825
+tune_rcucov = 0.075
+tune_gfrcrit = 0.333
+tune_gkdrag = 0.0
+tune_minsnowfrac = 0.3
+tune_box_liq_asy = 4.0
+tune_gust_factor = 7.0
+icpl_turb_clc  = 2
+max_calibfac_clcl = 2.0
+! tune_supsat_limfac           = 2. ! C'è nell'ope ma non in V o MS
+! tune_zcsg                    = 0.25 ! C'è nell'ope ma non in V o MS
+! tune_v0snow                  = 20. ! C'è nell'ope ma non in V o MS
+! Le prossime 3 non ci sono nell'ope
+itune_gust_diag  = 3
+tune_gustsso_lim = 20.
+tune_eiscrit    = 7.
 /
 
 &turbdiff_nml
@@ -173,12 +188,12 @@ tune_gustlim_fac             = 1.2
   frcsmot       = 0.2   ! these 2 switches together apply vertical smoothing of the TKE source terms
   imode_frcsmot = 2     ! in the tropics (only), which reduces the moist bias in the tropical lower troposphere
  ! use horizontal shear production terms with 1/SQRT(Ri) scaling to prevent unwanted side effects:
-  itype_sher    = 2    
+  itype_sher    = 2
   ltkeshs       = .true.
   a_hshr        = 2.0
   icldm_turb    = 2
   q_crit        = 2.0
-  imode_tkesso  = 3    !L260413 litt3
+  imode_tkesso  = 2
   alpha1        = 0.125
   rlam_heat     = 10
 /
@@ -186,6 +201,7 @@ tune_gustlim_fac             = 1.2
   ntiles         = 3
   nlev_snow      = 3
   lmulti_snow    = .false.
+!  itype_snowevap = 3  !L: added by me in previous version of fcast_urb
   itype_heatcond = 3
   idiag_snowfrac = 20
   lsnowtile      = .true.
@@ -201,6 +217,11 @@ tune_gustlim_fac             = 1.2
   c_soil_urb     = 0.5
   sstice_mode    = 2
   lterra_urb     = .false.  !switch TERRA_URB
+  lurbalb        = .true. !L: inizio mia parte
+  itype_ahf      = 2      !L: se metto 2 cosa succede?
+  itype_kbmo     = 2      !L: added by me
+  itype_eisa     = 3      !L: idem
+
 /
 
 &radiation_nml
@@ -210,7 +231,7 @@ tune_gustlim_fac             = 1.2
   irad_aero           = 6
   albedo_type         = 2          ! Modis albedo
   islope_rad          = 0
-  vmr_co2             = 390.e-06   ! values representative for 2012
+  vmr_co2             = 390.e-06   ! values representative for 2012 !MSiena: per il 2022 tutti questi valori sono cambiati!
   vmr_ch4             = 1800.e-09
   vmr_n2o             = 322.0e-09
   vmr_o2              = 0.20946
@@ -223,10 +244,10 @@ tune_gustlim_fac             = 1.2
   iadv_rhotheta   = 2
   ivctype         = 2
   itime_scheme    = 4
-  exner_expol     = 0.6
+  exner_expol     = 0.333 !L: prima era 0.6, cambiato da M
   vwind_offctr    = 0.2
-  damp_height     = 12250.
-  rayleigh_coeff  = 12.0  !L260413 litt3 (da cambiare anche a 1 km)
+  damp_height     = 12250.,12250.,12250.
+  rayleigh_coeff  = 5.0,5.0,5.0
 ! the following divergence damping settings should also be used in assimilation cycle; the settings used in the global
 ! DA cycle might compromise the dynamics of convection
   divdamp_fac     = 0.004
@@ -234,6 +255,7 @@ tune_gustlim_fac             = 1.2
   divdamp_type    = 32
   divdamp_trans_start = 12500.
   divdamp_trans_end   = 17500.
+!  l_open_ubc      = .false. ! anche se MS ce l'aveva, devo commentarlo perchè forrtl: severe (19): invalid reference to variable in NAMELIST input
   igradp_method   = 3
   l_zdiffu_t      = .true.
   thslp_zdiffu    = 0.02
@@ -255,9 +277,10 @@ tune_gustlim_fac             = 1.2
 
 &dynamics_nml
  iequations     = 3
+! idiv_method    = 1
  divavg_cntrwgt = 0.50
  lcoriolis      = .true.
- lmoist_thdyn   = .false. !L260413 also litt3
+!  lmoist_thdyn   = .false. ! C'è nell'ope ma non in MS
 /
 
 &transport_nml
@@ -277,11 +300,10 @@ tune_gustlim_fac             = 1.2
  hdiff_smag_fac   = 0.025
  lhdiff_vn        = .true.
  lhdiff_temp      = .true.
- lsmag_3d = .true. !L260227 litt3       !(for all dx <= 1km) 
- lhdiff_smag_w = .true. !L260227 litt3  !(for all dx <= 1km) 
-!L260413 litt3
-!lhdiff_multfac > 1 ! Multiplication factor for calculating normalized diffusion for nested domains; When experiencing stability issues (e.g. too high CFL numbers), try to increase this value > 1
+! lsmag_3d = .true.,.true.,.true. !(Default false,) cos   utilizzi la formulazione 3d di smago per calcolare il coefficiente di diffusione orizzontale, attento ad attivarlo per ogni dominio in cui usi smago
+! lhdiff_smag_w = .true.,.true.,.true. !(Default  false) Utilizzo addizionale della diffusione di Smagorinsky per w
 /
+!GLi utlimi due li metto solo se uso Smagorinsky
 
 &interpol_nml
   nudge_zone_width = 10
@@ -301,10 +323,11 @@ tune_gustlim_fac             = 1.2
 
 &extpar_nml
  itopo                = 1
- n_iter_smooth_topo   = 1,
- hgtdiff_max_smooth_topo = 200., !L260224 litt3
- heightdiff_threshold = 1000., !L260121 msiena (da gunther)
+ n_iter_smooth_topo   = 1,1,1 !Fai attenzione, ho disattivato lo smoother nel terzo dominio.
+ hgtdiff_max_smooth_topo = 750.,400.,200. ! da namelist Gunther, sembra effetivamente avere un impatto
+ heightdiff_threshold = 2250.,1500.,1000.
  itype_vegetation_cycle = 2 ! 2 is actually the ICON-D2 setup but needs T2M-CLIM data which is not available from extpar web ui
+! read_nc_via_cdi      = .false. !MS ce l'aveva, ma non mi fido al momento
  extpar_filename      = "@LOCALGRID_EXTERNAL@"
  itype_lwemiss        = 2
 /

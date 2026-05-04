@@ -1,43 +1,47 @@
+###
+#  CONF MODELLO OPE, DOMINIO NEST500_v1, 24H
+###
 # Model environment variables
-MODEL_BASE=/ind2/meteo/a07smr03/lami/srcintel/icon_2025-04-1
+#MODEL_BASE=$WORKDIR_BASE/srcintel/icon-nwp_terra-urb-2025-11-13
 MODEL_BIN=$MODEL_BASE/bin/icon
 MODEL_STATIC=$WORKDIR_BASE/data/icon
 
 # Parent model environment variables
-PARENTMODEL=ICON
-PARENTMODEL_ARKI_DS=$WORKDIR_BASE/arkimet/icon_fn1w_EM500v1glbtuoff
+PARENTMODEL=IFS
+PARENTMODEL_ARKI_DS=$ARKI_DIR/hres_am_foricon
 #PARENTMODEL_SIGNAL=hres_am_foricon
 PARENTMODEL_FREQINI=6
 PARENTMODEL_FREQANA=6
 PARENTMODEL_FREQFC=1
-#
-PARENTMODEL_DOMAIN=Nest500_from_EM500mv1_to_EM125m_GLBC_v0
-PARENTMODEL_STATIC=$MODEL_STATIC/domain_$PARENTMODEL_DOMAIN
-PARENTMODEL_GRIDFILE=${PARENTMODEL_DOMAIN}_DOM01.nc 
-PARENTMODEL_STATICFILE=${PARENTMODEL_DOMAIN}_DOM01_external_parameter.nc 
-
-
 
 # ICON-2I domain and grid files #LUDO
-DOMAIN=Nest500_from_EM500mv1_to_EM125m_GLBC_v0
-LOCALGRID=$MODEL_STATIC/domain_$DOMAIN/${DOMAIN}_DOM02.nc
-LOCALGRID_PARENT=$MODEL_STATIC/domain_$DOMAIN/${DOMAIN}_DOM01.nc
-LOCALGRID_EXTERNAL=$MODEL_STATIC/domain_$DOMAIN/${DOMAIN}_DOM02_external_parameter.nc
+DOMAIN=Nest500_from_OPE2km_to_EM500m_GLBC_v1
+#L: ICON-D3_DOM01       ICON-D2_DOM01_b.nc
+LOCALGRID=$MODEL_STATIC/domain_$DOMAIN/${DOMAIN}_DOM01.nc
+LOCALGRID_PARENT=$MODEL_STATIC/domain_$DOMAIN/${DOMAIN}_DOM01.parent.nc
+LOCALGRID_EXTERNAL=$MODEL_STATIC/domain_$DOMAIN/${DOMAIN}_DOM01_external_parameter.nc
+#L: ${DOMAIN}_external_parameter.nc  
 
-# Time step 10 per 1 km
-TIME_STEP=2.5
-
-# invent W_SO_ICE and FR_ICE and set them to 0
-#ADD_ICE_FIELDS=Y
+# Time step 20 per 5 km
+TIME_STEP=20
 
 # Model environment variables
 MODEL_BACK=0
-MODEL_STOP=24
+MODEL_STOP=12
 MODEL_BCANA=N
 MODEL_FREQINI=12
 ENS_TOTAL_MEMB=0
+MODEL_ARCHIVE_ANA=$WORKDIR/../enda/archive
+
 # Time difference between model and parent reftime 
-MODEL_DELTABD=0
+case $TIME in
+    03 | 09 | 15 | 21)
+        MODEL_DELTABD=0 #was 9
+        ;;
+    00 | 06 | 12 | 18)
+        MODEL_DELTABD=0 #was 6
+esac
+
 # Number of boundary conditions handled by each task
 NBC_PER_TASK=1
 
@@ -73,7 +77,4 @@ NWPWAITSOLAR_RUN=1800
 NWPWAITSOLAR=14400
 NWPWAITWAIT=60
 # wait for analysis?
-WAIT_ANALYSIS=N
-#READY_FILE_DELAY=40
-# to be removed
-#STOP_ON_FAIL=Y
+WAIT_ANALYSIS=Y
