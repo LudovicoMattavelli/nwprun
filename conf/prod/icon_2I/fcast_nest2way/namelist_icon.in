@@ -85,8 +85,7 @@
 ! ------------------------------------------------------------------------------------------
 ! OUTPUT: surface fields
 ! ------------------------------------------------------------------------------------------
-! INCLUDE output_nml_domain_Nest500_from_OPE2km_to_EM500m_v1_DOM01
-@INCLUDE output_nml_domain_Nest500_from_OPE2km_to_EM500m_v1_DOM03@
+@INCLUDE output_nml_domain_Nesting500m-Bolzano_v0_DOM03@
 &run_nml
  num_lev                     = 65,65,65 ! L credo funzioni anche se ne lascio solo 1 quando solo uguali. Questo vale per tuttii parametri perchè Virginia aveva fatto così
  lvert_nest                  = .false.
@@ -137,21 +136,6 @@ dt_gwd    = 120.,120.,120. !Quello base    360 s, si tratta del NON OROGRAPHIC g
 lsgs_cond = .true.,.true.,.false. !L260330 litt2 
 /
 
-! L: commentato già da Matteo
-!&twomom_mcrph_nml
-! ccn_type        = 7
-! luse_mu_Dm_rain = .true.  ! Default
-! lturb_enhc     = .true.  ! Default .false.
-! rain_cmu0      = -1.0    ! Exponential Distribution for small droplets
-! ecoll_gg_wet    = 0.40    ! Standard 0.4
-! ecoll_gg        = 0.05    ! Standard 0.1
-! Tcoll_gg_wet    = 273.16
-! isnow_stick     = 6      ! Low limit for Connely
-! Tmax_gr_rime    = 305.16  ! Effectively off
-! avel_g          = 45.32   ! Heyms graupel velocity
-! bvel_g          = 0.26
-!/
-
 &nwp_tuning_nml
 tune_sgsclifac = 1.0
 itune_albedo = 1
@@ -167,9 +151,6 @@ tune_box_liq_asy = 4.0
 tune_gust_factor = 7.0
 icpl_turb_clc  = 2
 max_calibfac_clcl = 2.0
-! tune_supsat_limfac           = 2. ! C'è nell'ope ma non in V o MS
-! tune_zcsg                    = 0.25 ! C'è nell'ope ma non in V o MS
-! tune_v0snow                  = 20. ! C'è nell'ope ma non in V o MS
 ! Le prossime da Litt2
 itune_slopecorr = 1
 itune_gust_diag = 4 
@@ -249,7 +230,6 @@ tune_gustlim_fac = 1.75,1.5,1.2
   divdamp_type    = 32
   divdamp_trans_start = 12500.
   divdamp_trans_end   = 17500.
-!  l_open_ubc      = .false. ! anche se MS ce l'aveva, devo commentarlo perchè forrtl: severe (19): invalid reference to variable in NAMELIST input
   igradp_method   = 3
   l_zdiffu_t      = .true.
   thslp_zdiffu    = 0.02
@@ -294,10 +274,9 @@ tune_gustlim_fac = 1.75,1.5,1.2
  hdiff_smag_fac   = 0.025
  lhdiff_vn        = .true.
  lhdiff_temp      = .true.
- lsmag_3d = .true.,.true.,.true. !(Default false,) cos   utilizzi la formulazione 3d di smago per calcolare il coefficiente di diffusione orizzontale, attento ad attivarlo per ogni dominio in cui usi smago
- lhdiff_smag_w = .true.,.true.,.true. !(Default  false) Utilizzo addizionale della diffusione di Smagorinsky per w
+ lsmag_3d = .false.,.false.,.true. ! litt3 L260526: in litt2 erano tutti true
+ lhdiff_smag_w = .false.,.false.,.true. ! litt3 L260526: in litt2 erano tutti true
 /
-!GLi utlimi due li metto solo se uso Smagorinsky
 
 &interpol_nml
   nudge_zone_width = 10

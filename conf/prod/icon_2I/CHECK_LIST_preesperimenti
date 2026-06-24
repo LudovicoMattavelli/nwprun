@@ -16,6 +16,7 @@ Prima di far girare un esperimento devo assicurarmi di ver fatto le seguenti cos
 	- rimappare sull'area e con la spaziatura aggiornata
 	- avere tutte le variabili che mi interessano nel file di uscita
 	- se cambio il nlev, devo cambiarlo anche nell'output mlev
+- OUTPUT_START E MODEL_STOP sono in hours! 
 ### Suite
 - Il Wall time sia sufficientemente grande da permettermi di fare l'esperimento
 ### 2way nesting

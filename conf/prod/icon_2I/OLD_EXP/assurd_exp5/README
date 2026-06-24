@@ -1,0 +1,13 @@
+L260413
+## Suite configurata per un 1-way nesting a 500m.
+### Implementazione 1-way nesting (ICON-LAM da run precedenti)
+Si veda il documento doc_nesting nel drive "SIMC-Modellistica/Catena Operativa/Documentazione".
+### Namelist a 500m
+La nml a 500m parte dall'operativo
+a cui sono state aggiunte le modifiche suggerite dalla Littman (litt2 o litt3)  nel Marzo 2026 e piccole modifiche
+prese dagli esperimenti di Matteo Siena (MS o msiena) e Virginia (V).
+Tutte le modifiche sono commentate con le sigle presentate tra parentesi e le date di implementazione.
+Nel conf.sh le modifiche per al file di bc e ic sono state fatte con Davide (202603).
+I dati necessari sono ottenuti dalla namelist di output ..._ICBC. Le variabili scelte sono state ottuenute dai 
+files di ICON-EU che usiamo per il backup + diversi tentativi.
+-------------------------------------------------------------------------------------------------------------------

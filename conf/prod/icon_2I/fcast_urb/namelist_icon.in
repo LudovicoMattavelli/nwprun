@@ -77,7 +77,7 @@
 ! ------------------------------------------------------------------------------------------
 ! OUTPUT: include predefined templates
 ! ------------------------------------------------------------------------------------------
-@INCLUDE output_nml_control@
+@INCLUDE output_nml_urb_isa@
 &run_nml
  num_lev                     = 65
  lvert_nest                  = .false.
@@ -143,6 +143,10 @@ max_calibfac_clcl            = 2
 tune_supsat_limfac           = 2.
 tune_zcsg                    = 0.25
 tune_v0snow                  = 20.
+ tune_urbahf = 15., 0., 0., 15.
+
+ tune_urbisa = 1.0, 1.0
+
 /
 
 &turbdiff_nml
@@ -183,6 +187,7 @@ tune_v0snow                  = 20.
   c_soil_urb     = 0.5
   sstice_mode    = 2
   lterra_urb     = .false.  !switch TERRA_URB
+
 /
 
 &radiation_nml

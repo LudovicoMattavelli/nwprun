@@ -1,7 +1,6 @@
-! I AM namelist_icon.in_500m_litt3
-! config_litt3:
-! Namelist per run a 500m. Namelist operativa con modifiche di litt3 + su extpar_nml (msiena) e su nwp_tuning (V e MS).
-! TERRA_URB OFF.
+! config_lud1_lev97
+! Namelist per run a 500m con Smago. Namelist operativa con modifiche di litt3 + su extpar_nml (msiena) e su nwp_tuning (V e MS).
+! TERRA_URB OFF. 97 livelli (come in Algrim2025)
 &limarea_nml
 ! fac_latbc_presbiascor       = 1
  latbc_varnames_map_file     = "map_file.latbc"
@@ -36,15 +35,12 @@
  ifeedback_type              = 2
 ! start_time                  = 0.,             ! irrelevant without nesting
 /
-
 &initicon_nml
- init_mode                   = @INIT_MODE@      ! 7 when init. from ICON, 2 from IFS
+ init_mode                   = 7 ! @INIT_MODE@      ! 7 when init. from ICON, 2 from IFS
  zpbl1                       = 500.
  zpbl2                       = 1000.
  lread_ana                   = @LREAD_ANA@      ! true if analysis increments are read
- ifs2icon_filename           = "@MODEL_PRE_DATADIR@/ic_@DATES@@TIMES@.nc"
- dwdfg_filename              = "@MODEL_PRE_DATADIR@/@FILEFG@"
- dwdana_filename             = "@MODEL_PRE_DATADIR@/@FILEAN@"
+ dwdfg_filename              = "@MODEL_PRE_DATADIR@/ic_@DATES@@TIMES@.nc"
  filetype                    = @FILETYPE@
  ana_varnames_map_file       = "map_file.ana"
  ltile_coldstart             = @LTILE@
@@ -84,8 +80,9 @@
 ! ------------------------------------------------------------------------------------------
 @INCLUDE output_nml_domain_Nest500_from_OPE2km_to_EM500m_v1_DOM03@
 @INCLUDE output_nml_main_ICBC@
+@INCLUDE output_nml_tke_high_freq@
 &run_nml
- num_lev                     = 65
+ num_lev                     = 97 !lev97 was 65
  lvert_nest                  = .false.
  dtime                       = @TIME_STEP@          ! timestep in seconds - 24. for R2B10,
  ldynamics                   = .TRUE.       ! dynamics
@@ -101,7 +98,6 @@
 ! luse_radarfwo               = @ACT_EMVORADO@
 ! ldass_lhn                   = @MODEL_LHN@
 /
-
 &nwp_phy_nml
 lgrayzone_deepconv           = .false.
 inwp_gscp                    = 2,2,
@@ -111,7 +107,7 @@ inwp_convection              = 1
 lshallowconv_only            = .true.
 inwp_radiation               = 4
 inwp_cldcover                = 1
-inwp_turb                    = 1
+inwp_turb                    = 5  !L260110 msiena Attivo schema Smago
 inwp_satad                   = 1
 inwp_sso                     = 1
 inwp_gwd                     = 0
@@ -129,7 +125,7 @@ dt_conv                      = 60., !L260110 msiena
 dt_sso                       = 120.,
 dt_gwd                       = 120.,
 lvariable_rain_n0            = .true.
-lsgs_cond 		     = .false. !L260413 litt3  ! Switching off condensation heat at 2nd child (>1km)
+lsgs_cond 		             = .false. !L260413 litt3  ! Switching off condensation heat at 2nd child (>1km)
 /
 &nwp_tuning_nml
 tune_sgsclifac               = 1
@@ -149,30 +145,25 @@ max_calibfac_clcl            = 2
 !L260413 litt3
 itune_slopecorr              = 1
 itune_gust_diag              = 4   
-tune_gustlim_agl 	     = 1500
+tune_gustlim_agl 	         = 1500
 tune_gustlim_fac             = 1.2 
-!L260215 i seguenti 3 c'erano nell'ope ma non in MS o V
-!tune_supsat_limfac           = 2.  !erano commentati da V
-!tune_zcsg                    = 0.25 !erano commentati da V
-!tune_v0snow                  = 20. !erano commentati da V
 /
-
 &turbdiff_nml
   tkhmin        = 0.5
   tkmmin        = 0.75
-  pat_len       = 750.
-  tur_len       = 300.
-  rat_sea       = 0.8
-  ltkesso       = .true.
-  frcsmot       = 0.2   ! these 2 switches together apply vertical smoothing of the TKE source terms
-  imode_frcsmot = 2     ! in the tropics (only), which reduces the moist bias in the tropical lower troposphere
+  pat_len	    = 750.
+  tur_len	    = 300.
+  rat_sea	    = 0.8
+  ltkesso	    = .true.
+  frcsmot	    = 0.2   ! these 2 switches together apply vertical smoothing of the TKE source terms
+  imode_frcsmot     = 2     ! in the tropics (only), which reduces the moist bias in the tropical lower troposphere
  ! use horizontal shear production terms with 1/SQRT(Ri) scaling to prevent unwanted side effects:
-  itype_sher    = 2    
-  ltkeshs       = .true.
+  itype_sher        = 2
+  ltkeshs	    = .true.
   a_hshr        = 2.0
   icldm_turb    = 2
   q_crit        = 2.0
-  imode_tkesso  = 3    !L260413 litt3
+  imode_tkesso  = 3 !L260413 litt3 Ri-number dependent reduction factor for Ri>1, higher if dx<1km
   alpha1        = 0.125
   rlam_heat     = 10
 /
@@ -212,7 +203,6 @@ tune_gustlim_fac             = 1.2
   vmr_cfc12           = 532.e-12
   ecrad_data_path     = "@MODEL_BASE@/externals/ecrad/data/"
 /
-
 &nonhydrostatic_nml
   iadv_rhotheta   = 2
   ivctype         = 2
@@ -220,7 +210,7 @@ tune_gustlim_fac             = 1.2
   exner_expol     = 0.6
   vwind_offctr    = 0.2
   damp_height     = 12250.
-  rayleigh_coeff  = 12.0  !L260413 litt3 (da cambiare anche a 1 km)
+  rayleigh_coeff  = 12.0 !L260413 litt3
 ! the following divergence damping settings should also be used in assimilation cycle; the settings used in the global
 ! DA cycle might compromise the dynamics of convection
   divdamp_fac     = 0.004
@@ -229,51 +219,46 @@ tune_gustlim_fac             = 1.2
   divdamp_trans_start = 12500.
   divdamp_trans_end   = 17500.
   igradp_method   = 3
-  l_zdiffu_t      = .true.
+  l_zdiffu_t	  = .true.
   thslp_zdiffu    = 0.02
   thhgtd_zdiffu   = 125.
   htop_moist_proc = 22500.
   hbot_qvsubstep  = 22500
 /
-
 &sleve_nml
  min_lay_thckn   = 20.
  itype_laydistr  = 1
- top_height      = 22000.
+ top_height	 = 22000.
  stretch_fac     = 0.65
  decay_scale_1   = 4000.
  decay_scale_2   = 2500.
- decay_exp       = 1.2
+ decay_exp	 = 1.2
  flat_height     = 16000.
 /
-
 &dynamics_nml
  iequations     = 3
+ idiv_method    = 1
  divavg_cntrwgt = 0.50
- lcoriolis      = .true.
- lmoist_thdyn   = .false. !L260413 also litt3
+ lcoriolis	= .true.
 /
-
 &transport_nml
  ctracer_list = '12345'
  ivadv_tracer = 3,3,3,3,3,3
  itype_hlimit = 3,4,4,4,4,4
  ihadv_tracer = 52,2,2,2,2,2
- llsq_svd       = .TRUE.
- beta_fct       = 1.005
+ llsq_svd	= .TRUE.
+ beta_fct	= 1.005
 /
-
 &diffusion_nml
- hdiff_order      = 5
+ hdiff_order	  = 5
  itype_vn_diffu   = 1
  itype_t_diffu    = 2
  hdiff_efdt_ratio = 24
  hdiff_smag_fac   = 0.025
  lhdiff_vn        = .true.
- lhdiff_temp      = .true.
- lsmag_3d = .true. !L260227 litt3       !(for all dx <= 1km) 
- lhdiff_smag_w = .true. !L260227 litt3  !(for all dx <= 1km) 
-!L260413 litt3
+ lhdiff_temp	  = .true.
+lsmag_3d = .false. !L260512 lud1: .true. recommended at mesh sizes finer than 1 km if the LES turbulence scheme is not used
+ lhdiff_smag_w = .false. !L260512 lud1 same as before
 !lhdiff_multfac > 1 ! Multiplication factor for calculating normalized diffusion for nested domains; When experiencing stability issues (e.g. too high CFL numbers), try to increase this value > 1
 /
 
@@ -281,18 +266,16 @@ tune_gustlim_fac             = 1.2
   nudge_zone_width = 10
   nudge_max_coeff  = 0.05  ! use 0.075 in assimilation cycle
   lsq_high_ord     = 3
-  l_intp_c2l       = .true.
-  l_mono_c2l       = .true.
+  l_intp_c2l	   = .true.
+  l_mono_c2l	   = .true.
 !  support_baryctr_intp = .true.
 /
-
 &gridref_nml
  grf_intmethod_e  = 6
  grf_intmethod_ct = 2
  grf_tracfbk      = 2
  denom_diffu_v    = 150.
 /
-
 &extpar_nml
  itopo                = 1
  n_iter_smooth_topo   = 1,

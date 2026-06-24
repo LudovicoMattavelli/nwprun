@@ -1,7 +1,6 @@
-! config_ope_ope_litt2:
-! Namelist per run a 500m. Stessa conf 1km e 2km tranne dt_conv, hgtdiff_max_smooth_topo e heightdiff_threshold. TUOFF
-! BC ope sia per 2km che per 1km (non impattanti nella namelist, ma buono come recap).
-! litt1: in diffusion_nml aggiunta di  lsmag_3d e lhdiff_smag_w entrambi true
+! config_litt3:
+! Namelist per run a 500m. Nesting for ICON. Namelist operativa con modifiche di litt3 + su extpar_nml (msiena) e su nwp_tuning (V e MS).
+! TERRA_URB OFF.
 &limarea_nml
 ! fac_latbc_presbiascor       = 1
  latbc_varnames_map_file     = "map_file.latbc"
@@ -36,7 +35,6 @@
  ifeedback_type              = 2
 ! start_time                  = 0.,             ! irrelevant without nesting
 /
-
 &initicon_nml
  init_mode                   = 7 ! @INIT_MODE@      ! 7 when init. from ICON, 2 from IFS
  zpbl1                       = 500.
@@ -65,6 +63,17 @@
 ! output_nml_dict            = 'map_file.fc'
  lmask_boundary              = .true.           ! false in assimilation cycle
  wshear_uv_heights           = 6000.,-1.,-1.
+!tke diagnostic
+ ldiagnose_gstke	     = .true.
+/
+
+&gribout_nml
+ generatingCenter            = 80
+ generatingSubcenter         = 255
+ generatingProcessIdentifier = @MODEL_FCI2I_GP@
+ localtablesversion          = 0
+! see mo_gribout_nml.f90 for preset behavior
+ preset                      = 'deterministic'
 /
 
 &gribout_nml
@@ -80,9 +89,11 @@
 ! ------------------------------------------------------------------------------------------
 ! OUTPUT: include predefined templates
 ! ------------------------------------------------------------------------------------------
+@INCLUDE output_nml_domain_Nest500_from_OPE2km_to_EM500m_v1_DOM03@
 @INCLUDE output_nml_main_ICBC@
+@INCLUDE output_tke_diagnostic@
 &run_nml
- num_lev                     = 65
+ num_lev                     = 65 
  lvert_nest                  = .false.
  dtime                       = @TIME_STEP@          ! timestep in seconds - 24. for R2B10,
  ldynamics                   = .TRUE.       ! dynamics
@@ -122,11 +133,11 @@ icpl_aero_conv               = 1
 icpl_aero_gscp               = 1
 icpl_o3_tp                   = 1
 dt_rad                       = 720.
-dt_conv                      = 60.,
+dt_conv                      = 60., !L260110 msiena
 dt_sso                       = 120.,
 dt_gwd                       = 120.,
 lvariable_rain_n0            = .true.
-lsgs_cond 		     = .false. !L260227 litt2
+lsgs_cond 		     = .false. !L260413 litt3  ! Switching off condensation heat at 2nd child (>1km)
 /
 &nwp_tuning_nml
 tune_sgsclifac               = 1
@@ -143,19 +154,15 @@ tune_box_liq_asy             = 4
 tune_gust_factor             = 7
 icpl_turb_clc                = 2
 max_calibfac_clcl            = 2
-!L260227 litt2 
+!L260413 litt3
 itune_slopecorr              = 1
 itune_gust_diag              = 4   
 tune_gustlim_agl 	     = 1500
-tune_gustlim_fac             = 1.2 ! Potenzialmente da mettere anche della b.c
+tune_gustlim_fac             = 1.2 
 !L260215 i seguenti 3 c'erano nell'ope ma non in MS o V
-tune_supsat_limfac           = 2.  !erano commentati da V
-tune_zcsg                    = 0.25 !erano commentati da V
-tune_v0snow                  = 20. !erano commentati da V
-!L260215 i seguenti 3 non c'erano nell'ope ma si in MS
-!itune_gust_diag  = 3
-!tune_gustsso_lim = 20.
-!tune_eiscrit    = 7.
+!tune_supsat_limfac           = 2.  !erano commentati da V
+!tune_zcsg                    = 0.25 !erano commentati da V
+!tune_v0snow                  = 20. !erano commentati da V
 /
 
 &turbdiff_nml
@@ -173,7 +180,7 @@ tune_v0snow                  = 20. !erano commentati da V
   a_hshr        = 2.0
   icldm_turb    = 2
   q_crit        = 2.0
-  imode_tkesso  = 3    !L260227 litt3 (was 2)
+  imode_tkesso  = 3    !L260413 litt3
   alpha1        = 0.125
   rlam_heat     = 10
 /
@@ -196,10 +203,6 @@ tune_v0snow                  = 20. !erano commentati da V
   c_soil_urb     = 0.5
   sstice_mode    = 2
   lterra_urb     = .false.  !switch TERRA_URB
-  lurbalb        = .true. !L: inizio mia parte
-  itype_ahf      = 2      !L: se metto 2 cosa succede?
-  itype_kbmo     = 2      !L: added by me
-  itype_eisa     = 3      !L: idem
 /
 
 &radiation_nml
@@ -225,7 +228,7 @@ tune_v0snow                  = 20. !erano commentati da V
   exner_expol     = 0.6
   vwind_offctr    = 0.2
   damp_height     = 12250.
-  rayleigh_coeff  = 12.0  !L260227 litt2 (da cambiare anche a 1 km)
+  rayleigh_coeff  = 12.0  !L260413 litt3 (da cambiare anche a 1 km)
 ! the following divergence damping settings should also be used in assimilation cycle; the settings used in the global
 ! DA cycle might compromise the dynamics of convection
   divdamp_fac     = 0.004
@@ -256,7 +259,7 @@ tune_v0snow                  = 20. !erano commentati da V
  iequations     = 3
  divavg_cntrwgt = 0.50
  lcoriolis      = .true.
- lmoist_thdyn   = .false.
+ lmoist_thdyn   = .false. !L260413 also litt3
 /
 
 &transport_nml
@@ -276,8 +279,10 @@ tune_v0snow                  = 20. !erano commentati da V
  hdiff_smag_fac   = 0.025
  lhdiff_vn        = .true.
  lhdiff_temp      = .true.
- lsmag_3d = .true. !L260227 added under Daniela Littman (for all dx <= 1km) 
- lhdiff_smag_w = .true. !L260227 added under Daniela Littman(for all dx <= 1km) 
+ lsmag_3d = .true. !L260227 litt3       !(for all dx <= 1km) 
+ lhdiff_smag_w = .true. !L260227 litt3  !(for all dx <= 1km) 
+!L260413 litt3
+!lhdiff_multfac > 1 ! Multiplication factor for calculating normalized diffusion for nested domains; When experiencing stability issues (e.g. too high CFL numbers), try to increase this value > 1
 /
 
 &interpol_nml
@@ -299,8 +304,8 @@ tune_v0snow                  = 20. !erano commentati da V
 &extpar_nml
  itopo                = 1
  n_iter_smooth_topo   = 1,
- hgtdiff_max_smooth_topo = 200., !L260224 Specifico per 500m
- heightdiff_threshold = 1000., !L260224 Specifico per 500m
+ hgtdiff_max_smooth_topo = 200., !L260224 litt3
+ heightdiff_threshold = 1000., !L260121 msiena (da gunther)
  itype_vegetation_cycle = 2 ! 2 is actually the ICON-D2 setup but needs T2M-CLIM data which is not available from extpar web ui
  extpar_filename      = "@LOCALGRID_EXTERNAL@"
  itype_lwemiss        = 2

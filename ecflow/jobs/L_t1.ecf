@@ -1,3 +1,0 @@
-%include <head.h>
-echo "I am part of a suite that lives in %ECF_HOME%"
-%include <tail.h>

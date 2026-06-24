@@ -2,18 +2,17 @@
 ! model levels
  filetype                     = 2                        ! output format: 2=GRIB2, 4=NETCDFv2
  dom                          = 1
- output_time_unit             = 2                        ! output in hours (3)
- output_bounds                = @OUTPUT_START@,20.,5.       ! start, end, increment
+ output_time_unit             = 3                       ! output in hours (3)
+ output_bounds                = @OUTPUT_START@,@MODEL_STOP@,1.       ! start, end, increment
  steps_per_file               = 1
  mode                         = 1                        ! 1: forecast mode (relative t-axis), 2: climate mode (absolute t-axis)
  include_last                 = .FALSE.
- output_filename              = "@MODEL_DATADIR@/icon_@DATES@@TIMES@00_control_250m"
+ output_filename              = "@MODEL_DATADIR@/icon_@DATES@@TIMES@00_tke_500m"
  filename_format              = '<output_filename>_+<ddhhmmss>'                   ! file name base
  ready_file                   = '@MODEL_DATADIR@/icon_@DATES@@TIMES@00_+<ddhhmmss>.rf'
- ml_varlist       	      = 'tke'
- output_grid                  = .FALSE.
+ ml_varlist       	      = 'u','v','w','tke', 'ddt_tke','ddt_tke_pconv',
+				'edr','tur_len_scale','sgs_tke','avg_edr'
+output_grid                   = .FALSE.
  stream_partitions_ml         = 1 ! needs to be adapted if num_io_procs is increased
- remap                        = 1   !0 in case unstructured grid is required
- reg_lon_def                  = 10.15,0.002,12.65 
- reg_lat_def                  = 44.33,0.003,45.33
-
+ remap                        = 0   !0 in case unstructured grid is required
+/

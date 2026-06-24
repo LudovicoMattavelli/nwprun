@@ -1,0 +1,11 @@
+&remap_nml
+ in_grid_filename  = '@gridfile@'
+ in_filename       = '@datafile@'
+ in_type           = 2
+ out_grid_filename = 'lateral_boundary.grid.nc'
+ out_filename      = '@out_file@'
+ out_type          = 2
+ out_filetype      = 4
+ l_have3dbuffer    = .false.
+ ncstorage_file    = "ncstorage.tmp"
+/

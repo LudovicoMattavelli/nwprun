@@ -20,7 +20,7 @@ PARENTMODEL_FREQFC=1
 MODEL_STATIC=$WORKDIR_BASE/data/icon
 NESTING=Y
 #MODEL_STATIC=/g100_work/smr_prod/data
-DOMAIN=Nest500_from_OPE2km_to_EM500m_GLBC_v1
+DOMAIN=Nesting500m-Bolzano_v0
 LOCALGRID=$MODEL_STATIC/domain_$DOMAIN/${DOMAIN}_DOM01.nc
 LOCALGRID_NEST=$MODEL_STATIC/domain_$DOMAIN/${DOMAIN}_DOM02.nc
 LOCALGRID_NEST_NEST=$MODEL_STATIC/domain_$DOMAIN/${DOMAIN}_DOM03.nc # Aggiunto per n500m
@@ -30,19 +30,21 @@ LOCALGRID_EXTERNAL="$MODEL_STATIC/domain_$DOMAIN/${DOMAIN}_DOM<idom>_external_pa
 
 # Model environment variables
 MODEL_BACK=0
-MODEL_STOP=24
+MODEL_STOP=12
 MODEL_BCANA=N
 MODEL_FREQINI=12
 ENS_TOTAL_MEMB=0
 MODEL_ARCHIVE_ANA=$WORKDIR/../enda_ope_ng/file_salvati
 
+TIME_STEP=20
+
 # Time difference between model and parent reftime # L251219 metto a 0?
 case $TIME in
     03 | 09 | 15 | 21)
-        MODEL_DELTABD=9
+        MODEL_DELTABD=0
         ;;
     00 | 06 | 12 | 18)
-        MODEL_DELTABD=6
+        MODEL_DELTABD=0
 esac
 
 # Number of boundary conditions handled by each task

@@ -1,0 +1,176 @@
+&remap_nml
+ in_grid_filename  = '@gridfile@'
+ in_filename       = '@datafile@'
+ in_type           = 2
+ out_grid_filename = '@LOCALGRID@'
+ out_filename      = '@out_file@'
+ out_type          = 2
+ out_filetype      = 4
+ l_have3dbuffer    = .false.
+ ncstorage_file    = "ncstorage_ic.tmp"
+/
+&input_field_nml
+ inputname      = "P"
+ outputname     = "P"
+ intp_method    = 3
+/
+&input_field_nml
+ inputname      = "QC"
+ outputname     = "QC"
+ intp_method    = 3
+/
+&input_field_nml
+ inputname      = "QI"
+ outputname     = "QI"
+ intp_method    = 3
+/
+&input_field_nml
+ inputname      = "QR"
+ outputname     = "QR"
+ intp_method    = 3
+/
+&input_field_nml
+ inputname      = "QS"
+ outputname     = "QS"
+ intp_method    = 3
+/
+&input_field_nml
+ inputname      = "QV"
+ outputname     = "QV"
+ intp_method    = 3
+/
+&input_field_nml
+ inputname      = "T"
+ outputname     = "T"
+ intp_method    = 3
+/
+&input_field_nml
+ inputname      = "U"
+ outputname     = "U"
+ intp_method    = 3
+/
+&input_field_nml
+ inputname      = "V"
+ outputname     = "V"
+ intp_method    = 3
+/
+&input_field_nml
+ inputname      = "W"
+ outputname     = "W"
+ intp_method    = 3
+/
+&input_field_nml
+ inputname      = "ALB_SEAICE"
+ outputname     = "ALB_SEAICE"
+ intp_method    = 3
+/
+&input_field_nml
+ inputname      = "C_T_LK"
+ outputname     = "C_T_LK"
+ intp_method    = 3
+/
+&input_field_nml
+ inputname      = "EVAP_PL"
+ outputname     = "EVAP_PL"
+ intp_method    = 3
+/
+&input_field_nml
+ inputname      = "FRESHSNW"
+ outputname     = "FRESHSNW"
+ intp_method    = 3
+/
+&input_field_nml
+ inputname      = "FR_ICE"
+ outputname     = "FR_ICE"
+ intp_method    = 3
+/
+&input_field_nml
+ inputname      = "H_ICE"
+ outputname     = "H_ICE"
+ intp_method    = 3
+/
+&input_field_nml
+ inputname      = "H_ML_LK"
+ outputname     = "H_ML_LK"
+ intp_method    = 3
+/
+&input_field_nml
+ inputname      = "H_SNOW"
+ outputname     = "H_SNOW"
+ intp_method    = 3
+/
+&input_field_nml
+ inputname      = "QV_S"
+ outputname     = "QV_S"
+ intp_method    = 3
+/
+&input_field_nml
+ inputname      = "RHO_SNOW"
+ outputname     = "RHO_SNOW"
+ intp_method    = 3
+/
+&input_field_nml
+ inputname      = "T_BOT_LK"
+ outputname     = "T_BOT_LK"
+ intp_method    = 3
+/
+&input_field_nml
+ inputname      = "T_G"
+ outputname     = "T_G"
+ intp_method    = 3
+/
+&input_field_nml
+ inputname      = "T_ICE"
+ outputname     = "T_ICE"
+ intp_method    = 3
+/
+&input_field_nml
+ inputname      = "T_MNW_LK"
+ outputname     = "T_MNW_LK"
+ intp_method    = 3
+/
+&input_field_nml
+ inputname      = "T_SNOW"
+ outputname     = "T_SNOW"
+ intp_method    = 3
+/
+&input_field_nml
+ inputname      = "T_WML_LK"
+ outputname     = "T_WML_LK"
+ intp_method    = 3
+/
+&input_field_nml
+ inputname      = "W_I"
+ outputname     = "W_I"
+ intp_method    = 3
+/
+&input_field_nml
+ inputname      = "W_SNOW"
+ outputname     = "W_SNOW"
+ intp_method    = 3
+/
+&input_field_nml
+ inputname      = "Z0"
+ outputname     = "Z0"
+ intp_method    = 3
+/
+&input_field_nml
+ inputname      = "SMI"
+ outputname     = "SMI"
+ intp_method    = 3
+/
+&input_field_nml
+ inputname      = "T_SO"
+ outputname     = "T_SO"
+ intp_method    = 3
+/
+&input_field_nml
+ inputname      = "W_SO_ICE"
+ outputname     = "W_SO_ICE"
+ intp_method    = 3
+/
+&input_field_nml
+ inputname      = "HHL"
+ outputname     = "HHL"
+ intp_method    = 3
+/

@@ -2,7 +2,6 @@
 #  CONF MODELLO OPE, DOMINIO NEST500_v1, 24H
 ###
 # Model environment variables
-#MODEL_BASE=$WORKDIR_BASE/srcintel/icon-nwp_terra-urb-2025-11-13i
 MODEL_BIN=$MODEL_BASE/bin/icon
 MODEL_STATIC=$WORKDIR_BASE/data/icon
 
@@ -27,7 +26,7 @@ TIME_STEP=20
 
 # Model environment variables
 MODEL_BACK=0
-MODEL_STOP=1
+MODEL_STOP=24
 MODEL_BCANA=N
 MODEL_FREQINI=12
 ENS_TOTAL_MEMB=0

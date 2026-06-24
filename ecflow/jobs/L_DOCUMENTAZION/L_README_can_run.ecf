@@ -1,9 +1,0 @@
-%include <sched_wait.h>		## Alloca le risorse e lancia lo script che [probabilmente] prepara l'ambiente
-%include <head.h>
-
-set -x
-
-$ecflow_client --event=ready 	## Notifica a ecflow che è pront 	## Notifica a ecflow che è prontoo
-
-%include <tail.h>
-
